@@ -6,6 +6,7 @@ function PythonJudgeXBlock(runtime, element) {
     let editor = ace.edit("initial_code");
     editor.setOptions({
         maxLines: 70,
+        minLines: 10,
         autoScrollEditorIntoView: true,
         theme: "ace/theme/monokai",
         showPrintMargin: false,

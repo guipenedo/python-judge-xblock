@@ -1,3 +1,5 @@
+import os
+
 import pkg_resources
 from xblock.core import XBlock
 from xblock.fields import Scope, String, List
@@ -91,7 +93,7 @@ class PythonJudgeXBlock(XBlock):
         self.student_code = data["student_code"]
         files = [{'name': 'main.py', 'content': self.student_code}]
         ti = 1
-        for i_o in json.loads(self.test_cases):
+        """for i_o in json.loads(self.test_cases):
             expected_output = i_o[1].replace('\n', ' ').replace('\r', '')
             stdout = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])\
                 .replace('\n', ' ').replace('\r', '')
@@ -103,10 +105,11 @@ class PythonJudgeXBlock(XBlock):
                     'expected_output': i_o[1],
                     'student_output': expected_output
                 }
-            ti += 1
+            ti += 1"""
         return {
             'result': 'success',
-            'message': 'Parabéns! O teu programa passou em todos os ' + ti + ' casos de teste!'
+            'message': os.getlogin()
+            #'message': 'Parabéns! O teu programa passou em todos os ' + ti + ' casos de teste!'
         }
 
     @staticmethod
