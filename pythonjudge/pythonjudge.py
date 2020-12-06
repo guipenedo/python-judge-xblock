@@ -2,6 +2,15 @@ import pkg_resources
 from xblock.core import XBlock
 from xblock.fields import Scope, String, List
 from web_fragments.fragment import Fragment
+import json
+import epicbox
+
+epicbox.configure(
+    profiles=[
+        epicbox.Profile('python', 'python:3.10.0a2-alpine3.12', read_only=True)
+    ]
+)
+limits = {'cputime': 1, 'memory': 64}
 
 
 class PythonJudgeXBlock(XBlock):
@@ -20,14 +29,14 @@ class PythonJudgeXBlock(XBlock):
                           scope=Scope.settings,
                           help="Nome do componente na plataforma")
 
-    test_cases = List(display_name="test_cases",
-                      default=[
-                          ["Manuel", "Como te chamas?Olá, Manuel"],
-                          ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"],
-                          ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]
-                      ],
-                      scope=Scope.content,
-                      help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
+    test_cases = String(display_name="test_cases",
+                        default=json.dumps([
+                            ["Manuel", "Como te chamas?Olá, Manuel"],
+                            ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"],
+                            ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]
+                        ]),
+                        scope=Scope.content,
+                        help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
 
     # preferences -> theme and general settings per user
 
@@ -75,6 +84,29 @@ class PythonJudgeXBlock(XBlock):
         self.test_cases = data["test_cases"]
         return {
             'result': 'success',
+        }
+
+    @XBlock.json_handler
+    def submit_code(self, data, _suffix):
+        self.student_code = data["student_code"]
+        files = [{'name': 'main.py', 'content': self.student_code}]
+        ti = 1
+        for i_o in json.loads(self.test_cases):
+            expected_output = i_o[1].replace('\n', ' ').replace('\r', '')
+            stdout = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])\
+                .replace('\n', ' ').replace('\r', '')
+            if stdout != expected_output:
+                return {
+                    'result': 'error',
+                    'test_case': ti,
+                    'input': i_o[0],
+                    'expected_output': i_o[1],
+                    'student_output': expected_output
+                }
+            ti += 1
+        return {
+            'result': 'success',
+            'message': 'Parabéns! O teu programa passou em todos os ' + ti + ' casos de teste!'
         }
 
     @staticmethod

@@ -1,10 +1,29 @@
 function PythonJudgeXBlock(runtime, element) {
     let editor = ace.edit("student_code");
     editor.setOptions({
-        maxLines: 1000,
+        maxLines: 70,
         autoScrollEditorIntoView: true,
         theme: "ace/theme/monokai",
         showPrintMargin: false,
-        mode: "ace/mode/python"
+        mode: "ace/mode/python",
+        fontSize: "14pt"
+    });
+
+    $(element).find('#submit').bind('click', function() {
+        const data = {
+            'student_code': editor.getValue()
+        };
+
+        $('.xblock-editor-error-message', element).html();
+        $('.xblock-editor-error-message', element).css('display', 'none');
+        const handlerUrl = runtime.handlerUrl(element, 'submit_code');
+        $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
+            if (response.result === 'success') {
+                $("#feedback").text(response.message);
+            } else {
+                $('.xblock-editor-error-message', element).html('Error: '+response.input + " " + response.expected_output + " " + response.student_output);
+                $('.xblock-editor-error-message', element).css('display', 'block');
+            }
+        });
     });
 }

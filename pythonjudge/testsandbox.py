@@ -7,5 +7,5 @@ epicbox.configure(
 )
 files = [{'name': 'main.py', 'content': b'print(42)'}]
 limits = {'cputime': 1, 'memory': 64}
-result = epicbox.run('python', 'python3 main.py', files=files, limits=limits)
+result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin='14 5')
 print(result)

@@ -1,6 +1,13 @@
 #initial_code, #student_code {
     height: 200px;
-    width: 80%;
     border: 1px solid lightgray;
     margin: auto;
+}
+
+#student_code {
+    width: 100%;
+}
+
+#initial_code {
+    width: 80%;
 }
