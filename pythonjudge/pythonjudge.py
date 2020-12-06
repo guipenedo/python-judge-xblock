@@ -1,4 +1,4 @@
-import os
+import getpass
 
 import pkg_resources
 from xblock.core import XBlock
@@ -32,11 +32,7 @@ class PythonJudgeXBlock(XBlock):
                           help="Nome do componente na plataforma")
 
     test_cases = String(display_name="test_cases",
-                        default=json.dumps([
-                            ["Manuel", "Como te chamas?Olá, Manuel"],
-                            ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"],
-                            ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]
-                        ]),
+                        default='[["Manuel", "Como te chamas?Olá, Manuel"], ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]]',
                         scope=Scope.content,
                         help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
 
@@ -115,7 +111,7 @@ class PythonJudgeXBlock(XBlock):
             ti += 1"""
         return {
             'result': 'success',
-            'message': os.getlogin()
+            'message': getpass.getuser()
             #'message': 'Parabéns! O teu programa passou em todos os ' + ti + ' casos de teste!'
         }
 
