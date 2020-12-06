@@ -22,17 +22,22 @@ class PythonJudgeXBlock(XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
-    def student_view(self, context=None):
+    def student_view(self, context):
         """
         The primary view of the PythonJudgeXBlock, shown to students
         when viewing courses.
         """
+        if not self.student_code:
+            self.student_code = self.initial_code
         html = self.resource_string("static/html/code.html")
         frag = Fragment(html.format(self=self))
         frag.add_css(self.resource_string("static/css/code.css"))
+        frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
+        frag.add_javascript(self.resource_string("static/js/code_student.js"))
+        frag.initialize_js('PythonJudgeXBlock')
         return frag
 
-    def studio_view(self, context=None):
+    def studio_view(self, context):
         """
         The primary view of the paellaXBlock, shown to students
         when viewing courses.

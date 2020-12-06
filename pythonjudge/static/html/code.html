@@ -1,9 +1,1 @@
-<div class="codecheck_block"><!--display the pythonjudge problem content-->{{ content }}<br>
-    <!--check if the url works or not-->{% if self.url %}
-    <div><!--create new Submit button-->
-        <button id="submit-issue">Submit</button>
-    </div>
-    <br><!--display the Codecheck report here-->
-    <div id="response"></div>
-    {% endif %}
-</div>
+<div id="editor">{self.student_code}</div>
