@@ -26,7 +26,7 @@ class PythonJudgeXBlock(XBlock):
                           ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"],
                           ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]
                       ],
-                      scope=Scope.settings,
+                      scope=Scope.content,
                       help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
 
     # preferences -> theme and general settings per user
