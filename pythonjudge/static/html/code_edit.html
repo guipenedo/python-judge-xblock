@@ -1,15 +1,19 @@
 <div class="wrapper-comp-settings is-active editor-with-buttons " id="settings-tab">
     <ul class="list-input settings-list">
         <li class="field comp-setting-entry is-set">
+            <div class="wrapper-comp-setting"><label class="label setting-label" for="display_name">Display Name</label><input
+                    class="input setting-input" name="display_name" id="display_name" value="{self.display_name}" type="text"/></div>
+            <span class="tip setting-help">Nome que aparece na plataforma para o bloco</span></li>
+        <li class="field comp-setting-entry is-set">
             <div class="wrapper-comp-setting"><label class="label setting-label" for="initial_code">Initial code</label>
                 <div id="initial_code">{self.initial_code}</div>
             </div>
             <span class="tip setting-help">O código inicial para este problema</span>
         </li>
         <li class="field comp-setting-entry is-set">
-            <div class="wrapper-comp-setting"><label class="label setting-label" for="display_name">Display Name</label><input
-                    class="input setting-input" name="display_name" id="display_name" value="{self.display_name}" type="text"/></div>
-            <span class="tip setting-help">Nome que aparece na plataforma para o bloco</span></li>
+            <div class="wrapper-comp-setting"><label class="label setting-label" for="test_cases">Casos de teste</label><input
+                    class="input setting-input" name="test_cases" id="test_cases" value="{self.test_cases}" type="text"/></div>
+            <span class="tip setting-help">Uma lista de listas, estando cada uma das sublistas no formato: [input, output]</span></li>
     </ul>
     <div class="xblock-actions">
         <ul>

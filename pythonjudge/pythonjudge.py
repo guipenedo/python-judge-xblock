@@ -1,6 +1,6 @@
 import pkg_resources
 from xblock.core import XBlock
-from xblock.fields import Scope, String
+from xblock.fields import Scope, String, List
 from web_fragments.fragment import Fragment
 
 
@@ -20,6 +20,15 @@ class PythonJudgeXBlock(XBlock):
                           scope=Scope.settings,
                           help="Nome do componente na plataforma")
 
+    test_cases = List(display_name="test_cases",
+                      default=[
+                          ["Manuel", "Como te chamas?Olá, Manuel"],
+                          ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"],
+                          ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]
+                      ],
+                      scope=Scope.settings,
+                      help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
+
     # preferences -> theme and general settings per user
 
     def resource_string(self, path):
@@ -38,6 +47,8 @@ class PythonJudgeXBlock(XBlock):
         frag = Fragment(html.format(self=self))
         frag.add_css(self.resource_string("static/css/code.css"))
         frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js.js"))
         frag.add_javascript(self.resource_string("static/js/code_student.js"))
         frag.initialize_js('PythonJudgeXBlock')
         return frag
@@ -51,14 +62,17 @@ class PythonJudgeXBlock(XBlock):
         frag = Fragment(html.format(self=self))
         frag.add_css(self.resource_string("static/css/code.css"))
         frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js.js"))
         frag.add_javascript(self.resource_string("static/js/code_studio.js"))
         frag.initialize_js('PythonJudgeXBlock')
         return frag
 
     @XBlock.json_handler
     def save_settings(self, data, _suffix):
-        self.initial_code = data["initial_code"]
         self.display_name = data["display_name"]
+        self.initial_code = data["initial_code"]
+        self.test_cases = data["test_cases"]
         return {
             'result': 'success',
         }

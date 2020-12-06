@@ -15,7 +15,8 @@ function PythonJudgeXBlock(runtime, element) {
     $(element).find('.save-button').bind('click', function() {
         const data = {
             'initial_code': editor.getValue(),
-            'display_name': $(display_name).context.value
+            'display_name': $(display_name).context.value,
+            'test_cases': $(test_cases).context.value
         };
 
         $('.xblock-editor-error-message', element).html();
