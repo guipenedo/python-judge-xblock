@@ -1,15 +1,13 @@
-import getpass
-
 import pkg_resources
 from xblock.core import XBlock
-from xblock.fields import Scope, String, List
+from xblock.fields import Scope, String
 from web_fragments.fragment import Fragment
 import json
 import epicbox
 
 epicbox.configure(
     profiles=[
-        epicbox.Profile('python', 'python:3.10.0a2-alpine3.12', read_only=True)
+        epicbox.Profile('python', 'python:3.10.0a2-alpine3.12')
     ]
 )
 limits = {'cputime': 1, 'memory': 64}
@@ -94,12 +92,20 @@ class PythonJudgeXBlock(XBlock):
     @XBlock.json_handler
     def submit_code(self, data, _suffix):
         self.student_code = data["student_code"]
-        files = [{'name': 'main.py', 'content': self.student_code}]
+        files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
         ti = 1
-        """for i_o in json.loads(self.test_cases):
+        for i_o in json.loads(self.test_cases):
             expected_output = i_o[1].replace('\n', ' ').replace('\r', '')
-            stdout = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])\
-                .replace('\n', ' ').replace('\r', '')
+            result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
+            if result.exit_code != 0:
+                return {
+                    'result': 'error',
+                    'test_case': ti,
+                    'input': i_o[0],
+                    'expected_output': i_o[1],
+                    'student_output': "Non 0 exit code"
+                }
+            stdout = str(result["stdout"], 'utf-8').replace('\n', '').replace('\r', '')
             if stdout != expected_output:
                 return {
                     'result': 'error',
@@ -108,11 +114,10 @@ class PythonJudgeXBlock(XBlock):
                     'expected_output': i_o[1],
                     'student_output': expected_output
                 }
-            ti += 1"""
+            ti += 1
         return {
             'result': 'success',
-            'message': getpass.getuser()
-            #'message': 'Parabéns! O teu programa passou em todos os ' + ti + ' casos de teste!'
+            'message': 'Parabéns! O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
         }
 
     @staticmethod
