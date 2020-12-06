@@ -22,8 +22,7 @@ function PythonJudgeXBlock(runtime, element) {
             if (response.result === 'success') {
                 $("#feedback").text(response.message);
             } else {
-                $('.xblock-editor-error-message', element).html('Error: '+response.input + " " + response.expected_output + " " + response.student_output);
-                $('.xblock-editor-error-message', element).css('display', 'block');
+                runtime.notify('error', {title: gettext("Unable to update settings"), message: response.input + " " + response.expected_output + " " + response.student_output});
             }
         });
     });
