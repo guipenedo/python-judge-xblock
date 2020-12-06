@@ -15,6 +15,11 @@ class PythonJudgeXBlock(XBlock):
                  scope=Scope.user_state,
                  help="A submissão do utilizador para este problema")
 
+    display_name = String(display_name="Editor de Python",
+                          default="Display name",
+                          scope=Scope.content,
+                          help="Nome do componente na plataforma")
+
     # preferences -> theme and general settings per user
 
     def resource_string(self, path):
@@ -52,6 +57,7 @@ class PythonJudgeXBlock(XBlock):
     @XBlock.json_handler
     def save_settings(self, data):
         self.initial_code = data["initial_code"]
+        self.display_name = data["display_name"]
         return {
             'result': 'success',
         }
