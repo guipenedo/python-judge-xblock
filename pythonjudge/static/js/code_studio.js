@@ -26,7 +26,7 @@ function PythonJudgeXBlock(runtime, element) {
         const handlerUrl = runtime.handlerUrl(element, 'save_settings');
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
-                window.location.reload(false);
+
             } else {
                 $('.xblock-editor-error-message', element).html('Error: '+response.message);
                 $('.xblock-editor-error-message', element).css('display', 'block');
