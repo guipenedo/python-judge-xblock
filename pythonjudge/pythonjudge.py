@@ -83,6 +83,13 @@ class PythonJudgeXBlock(XBlock):
     def save_settings(self, data, _suffix):
         self.display_name = data["display_name"]
         self.initial_code = data["initial_code"]
+        try:
+            json.loads(data["test_cases"])
+        except ValueError:
+            return {
+                'result': 'error',
+                'message': 'test_cases tem que ser uma lista de json válida!'
+            }
         self.test_cases = data["test_cases"]
         return {
             'result': 'success',
