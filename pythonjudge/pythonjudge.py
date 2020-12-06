@@ -17,7 +17,7 @@ class PythonJudgeXBlock(XBlock):
 
     display_name = String(display_name="display_name",
                           default="Editor de Python",
-                          scope=Scope.content,
+                          scope=Scope.settings,
                           help="Nome do componente na plataforma")
 
     # preferences -> theme and general settings per user
@@ -49,6 +49,7 @@ class PythonJudgeXBlock(XBlock):
         """
         html = self.resource_string("static/html/code_edit.html")
         frag = Fragment(html.format(self=self))
+        frag.add_css(self.resource_string("static/css/code.css"))
         frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
         frag.add_javascript(self.resource_string("static/js/code_studio.js"))
         frag.initialize_js('PythonJudgeXBlock')

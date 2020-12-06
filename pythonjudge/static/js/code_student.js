@@ -1,6 +1,10 @@
 function PythonJudgeXBlock(runtime, element) {
-    ace.edit("student_code", {
-        mode: "ace/mode/python",
-        theme: "ace/theme/monokai"
+    let editor = ace.edit("student_code");
+    editor.setOptions({
+        maxLines: 1000,
+        autoScrollEditorIntoView: true,
+        theme: "ace/theme/monokai",
+        showPrintMargin: false,
+        mode: "ace/mode/python"
     });
 }

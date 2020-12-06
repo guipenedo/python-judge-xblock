@@ -3,9 +3,13 @@ function PythonJudgeXBlock(runtime, element) {
         runtime.notify('cancel', {});
     });
 
-    let editor = ace.edit("initial_code", {
-        mode: "ace/mode/python",
-        theme: "ace/theme/monokai"
+    let editor = ace.edit("initial_code");
+    editor.setOptions({
+        maxLines: 1000,
+        autoScrollEditorIntoView: true,
+        theme: "ace/theme/monokai",
+        showPrintMargin: false,
+        mode: "ace/mode/python"
     });
 
     $(element).find('.save-button').bind('click', function() {
