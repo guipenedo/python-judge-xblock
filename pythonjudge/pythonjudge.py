@@ -48,7 +48,7 @@ class PythonJudgeXBlock(XBlock):
         frag.add_css(self.resource_string("static/css/code.css"))
         frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_student.js"))
         frag.initialize_js('PythonJudgeXBlock')
         return frag
@@ -63,7 +63,7 @@ class PythonJudgeXBlock(XBlock):
         frag.add_css(self.resource_string("static/css/code.css"))
         frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js.js"))
+        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_studio.js"))
         frag.initialize_js('PythonJudgeXBlock')
         return frag
