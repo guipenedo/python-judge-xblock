@@ -27,7 +27,7 @@ class PythonJudgeXBlock(XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
-    def student_view(self, context):
+    def student_view(self, _context):
         """
         The primary view of the PythonJudgeXBlock, shown to students
         when viewing courses.
@@ -42,7 +42,7 @@ class PythonJudgeXBlock(XBlock):
         frag.initialize_js('PythonJudgeXBlock')
         return frag
 
-    def studio_view(self, context):
+    def studio_view(self, _context):
         """
         The primary view of the paellaXBlock, shown to students
         when viewing courses.
@@ -56,7 +56,7 @@ class PythonJudgeXBlock(XBlock):
         return frag
 
     @XBlock.json_handler
-    def save_settings(self, data):
+    def save_settings(self, data, _suffix):
         self.initial_code = data["initial_code"]
         self.display_name = data["display_name"]
         return {
