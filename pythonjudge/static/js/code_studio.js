@@ -3,9 +3,15 @@ function PythonJudgeXBlock(runtime, element) {
         runtime.notify('cancel', {});
     });
 
+    let editor = ace.edit("initial_code", {
+        mode: "ace/mode/python",
+        theme: "ace/theme/monokai"
+    });
+
     $(element).find('.save-button').bind('click', function() {
         const data = {
-            'initial_code': $(initial_code).context.value
+            'initial_code': editor.getValue(),
+            'display_name': $(display_name).context.value
         };
 
         $('.xblock-editor-error-message', element).html();
@@ -19,10 +25,5 @@ function PythonJudgeXBlock(runtime, element) {
                 $('.xblock-editor-error-message', element).css('display', 'block');
             }
         });
-    });
-
-    ace.edit("editor", {
-        mode: "ace/mode/python",
-        theme: "ace/theme/monokai"
     });
 }

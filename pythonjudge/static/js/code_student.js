@@ -1,5 +1,5 @@
 function PythonJudgeXBlock(runtime, element) {
-    ace.edit("editor", {
+    ace.edit("student_code", {
         mode: "ace/mode/python",
         theme: "ace/theme/monokai"
     });

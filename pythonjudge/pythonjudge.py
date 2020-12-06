@@ -6,17 +6,17 @@ from web_fragments.fragment import Fragment
 
 class PythonJudgeXBlock(XBlock):
     initial_code = String(display_name="initial_code",
-                 default="N = input('Qual é o valor de N?')\nprint(N)",
-                 scope=Scope.content,
-                 help="O código inicial para este problema")
+                          default="N = input('Qual é o valor de N?')\nprint(N)",
+                          scope=Scope.content,
+                          help="O código inicial para este problema")
 
     student_code = String(display_name="student_code",
-                 default="",
-                 scope=Scope.user_state,
-                 help="A submissão do utilizador para este problema")
+                          default="",
+                          scope=Scope.user_state,
+                          help="A submissão do utilizador para este problema")
 
-    display_name = String(display_name="Editor de Python",
-                          default="Display name",
+    display_name = String(display_name="display_name",
+                          default="Editor de Python",
                           scope=Scope.content,
                           help="Nome do componente na plataforma")
 
