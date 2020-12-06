@@ -22,7 +22,7 @@ class PythonJudgeXBlock(XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
-    def student_view(self):
+    def student_view(self, context=None):
         """
         The primary view of the PythonJudgeXBlock, shown to students
         when viewing courses.
@@ -32,7 +32,7 @@ class PythonJudgeXBlock(XBlock):
         frag.add_css(self.resource_string("static/css/code.css"))
         return frag
 
-    def studio_view(self):
+    def studio_view(self, context=None):
         """
         The primary view of the paellaXBlock, shown to students
         when viewing courses.
