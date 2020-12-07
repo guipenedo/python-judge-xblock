@@ -23,7 +23,10 @@ function PythonJudgeXBlock(runtime, element) {
                 $("#feedback").html(response.message);
             } else {
                 runtime.notify('error', {title: gettext("Erro num dos casos de teste"), message: "O teu programa falhou pelo menos um caso de teste. Vê a janela de output para mais informações."});
-                $("#feedback").html("Erro no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Output do teu programa: " + response.student_output)
+                if (response.exit_code === 0 && !response.stderr)
+                    $("#feedback").html("Output incorreta no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Output do teu programa: " + response.student_output)
+                else
+                    $("#feedback").html("Erro no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Exit code: " + response.exit_code + "<br/>Erro do teu programa: " + response.stderr)
             }
         });
     });

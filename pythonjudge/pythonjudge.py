@@ -13,6 +13,14 @@ epicbox.configure(
 limits = {'cputime': 1, 'memory': 64}
 
 
+def clean_std(std):
+    try:
+        std = std.decode('utf-8')
+    except (UnicodeDecodeError, AttributeError):
+        pass
+    return str(std).replace('\n', '<br/>').replace('\r', '')
+
+
 class PythonJudgeXBlock(XBlock):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
@@ -95,28 +103,21 @@ class PythonJudgeXBlock(XBlock):
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
         ti = 1
         for i_o in json.loads(self.test_cases):
-            expected_output = i_o[1].replace('\n', ' ').replace('\r', '')
+            expected_output = clean_std(i_o[1])
             result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
-            if result["exit_code"] != 0:
-                return {
-                    'result': 'failed',
-                    'test_case': ti,
-                    'input': i_o[0],
-                    'expected_output': expected_output,
-                    'student_output': "Non 0 exit code",
-                    'error_msg': result["stdout"]
-                }
-            stdout = str(result["stdout"], 'utf-8').replace('\n', '').replace('\r', '')
-            print(stdout)
-            print(expected_output)
-            if stdout != expected_output:
-                return {
-                    'result': 'failed',
-                    'test_case': ti,
-                    'input': i_o[0],
-                    'expected_output': expected_output,
-                    'student_output': stdout
-                }
+            stdout = clean_std(result["stdout"])
+            stderr = clean_std(result["stderr"])
+            response = {
+                'result': 'error',
+                'exit_code': result["exit_code"],
+                'test_case': ti,
+                'input': i_o[0],
+                'expected_output': expected_output,
+                'student_output': stdout,
+                'stderr': stderr
+            }
+            if result["exit_code"] != 0 or stdout != expected_output:
+                return response
             ti += 1
         return {
             'result': 'success',
