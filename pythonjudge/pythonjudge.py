@@ -19,7 +19,7 @@ def clean_std(std):
         std = std.decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
         pass
-    return str(std).strip(" \n").replace('\n', '<br/>').replace('\r', '')
+    return str(std).strip(" \n").replace('\n', '<br/>').replace('\r', '<br/>')
 
 
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
