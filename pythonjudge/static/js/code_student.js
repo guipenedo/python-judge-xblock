@@ -20,10 +20,10 @@ function PythonJudgeXBlock(runtime, element) {
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
                 runtime.notify('save', {state: 'end', title: gettext("O teu programa passou todos os casos de teste! Parabéns!")});
-                $("#feedback").text(response.message);
+                $("#feedback").html(response.message);
             } else {
                 runtime.notify('error', {title: gettext("Erro num dos casos de teste"), message: "O teu programa falhou pelo menos um caso de teste. Vê a janela de output para mais informações."});
-                $("#feedback").text("Erro no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Output do teu programa: " + response.student_output)
+                $("#feedback").html("Erro no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Output do teu programa: " + response.student_output)
             }
         });
     });
