@@ -107,6 +107,8 @@ class PythonJudgeXBlock(XBlock):
                     'error_msg': result["stdout"]
                 }
             stdout = str(result["stdout"], 'utf-8').replace('\n', '').replace('\r', '')
+            print(stdout)
+            print(expected_output)
             if stdout != expected_output:
                 return {
                     'result': 'failed',
