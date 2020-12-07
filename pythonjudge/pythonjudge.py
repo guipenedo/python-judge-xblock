@@ -33,6 +33,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                           scope=Scope.user_state,
                           help="A submissão do utilizador para este problema")
 
+    student_score = String(display_name="student_score",
+                           default=-1,
+                           scope=Scope.user_state)
+
     display_name = String(display_name="display_name",
                           default="Editor de Python",
                           scope=Scope.settings,
@@ -42,8 +46,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                         default='[["Manuel", "Como te chamas?Olá, Manuel"], ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]]',
                         scope=Scope.content,
                         help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
-
-    has_score = True
 
     # preferences -> theme and general settings per user
 
@@ -111,6 +113,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
     @XBlock.json_handler
     def submit_code(self, data, _suffix):
         self.student_code = data["student_code"]
+        self.student_score = 0
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
         ti = 1
         for i_o in json.loads(self.test_cases):
@@ -131,6 +134,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 self.runtime.publish(self, "grade", {"value": 0.0, "max_value": 1.0})
                 return response
             ti += 1
+        self.student_score = 1
         self.runtime.publish(self, "grade", {"value": 1.0, "max_value": 1.0})
         return {
             'result': 'success',
@@ -147,3 +151,15 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 </vertical_demo>
              """),
         ]
+
+    def has_submitted_answer(self):
+        return self.student_score != -1
+
+    def get_score(self):
+        return Score(raw_earned=max(self.student_score, 0), raw_possible=1)
+
+    def set_score(self, score):
+        self.student_score = score.raw_earned / score.raw_possible
+
+    def calculate_score(self):
+        return self.get_score()
