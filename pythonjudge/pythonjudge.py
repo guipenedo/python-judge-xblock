@@ -99,20 +99,21 @@ class PythonJudgeXBlock(XBlock):
             result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
             if result["exit_code"] != 0:
                 return {
-                    'result': 'error',
+                    'result': 'failed',
                     'test_case': ti,
                     'input': i_o[0],
-                    'expected_output': i_o[1],
-                    'student_output': "Non 0 exit code"
+                    'expected_output': expected_output,
+                    'student_output': "Non 0 exit code",
+                    'error_msg': result["stdout"]
                 }
             stdout = str(result["stdout"], 'utf-8').replace('\n', '').replace('\r', '')
             if stdout != expected_output:
                 return {
-                    'result': 'error',
+                    'result': 'failed',
                     'test_case': ti,
                     'input': i_o[0],
-                    'expected_output': i_o[1],
-                    'student_output': expected_output
+                    'expected_output': expected_output,
+                    'student_output': stdout
                 }
             ti += 1
         return {

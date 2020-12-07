@@ -22,7 +22,8 @@ function PythonJudgeXBlock(runtime, element) {
             if (response.result === 'success') {
                 $("#feedback").text(response.message);
             } else {
-                runtime.notify('error', {title: gettext("Unable to update settings"), message: response.input + " " + response.expected_output + " " + response.student_output});
+                runtime.notify('error', {title: gettext("Erro num dos casos de teste"), message: "O teu programa falhou pelo menos um caso de teste. Vê a janela de output para mais informações."});
+                $("#feedback").text("Erro no caso de teste " + response.test_case + ":\nInput: " + response.input + "\nOutput esperada: " + response.expected_output + "\n=============\nOutput do teu programa: " + response.student_output)
             }
         });
     });
