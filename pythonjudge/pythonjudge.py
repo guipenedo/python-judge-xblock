@@ -98,6 +98,14 @@ class PythonJudgeXBlock(XBlock):
         }
 
     @XBlock.json_handler
+    def autosave_code(self, data, _suffix):
+        if data["student_code"] != self.student_code:
+            self.student_code = data["student_code"]
+        return {
+            'result': 'success'
+        }
+
+    @XBlock.json_handler
     def submit_code(self, data, _suffix):
         self.student_code = data["student_code"]
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]

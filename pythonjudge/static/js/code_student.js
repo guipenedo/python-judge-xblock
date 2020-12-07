@@ -30,4 +30,20 @@ function PythonJudgeXBlock(runtime, element) {
             }
         });
     });
+
+    //autosave every 10 seconds
+    let previous_code = "";
+    const autosave_handlerurl = runtime.handlerUrl(element, 'autosave_code');
+    setInterval(() => {
+        if (previous_code !== editor.getValue()){
+            previous_code = editor.getValue();
+            const data = {
+                'student_code': previous_code
+            };
+            runtime.notify('save', {state: 'start'});
+            $.post(autosave_handlerurl, JSON.stringify(data)).done(function() {
+                runtime.notify('save', {state: 'end'});
+        });
+        }
+    }, 10*1000);
 }
