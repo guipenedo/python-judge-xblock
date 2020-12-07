@@ -1,7 +1,7 @@
 import pkg_resources
 from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.core import XBlock
-from xblock.fields import Scope, String
+from xblock.fields import Scope, String, Float
 from web_fragments.fragment import Fragment
 import json
 import epicbox
@@ -33,9 +33,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                           scope=Scope.user_state,
                           help="A submissão do utilizador para este problema")
 
-    student_score = String(display_name="student_score",
-                           default=-1,
-                           scope=Scope.user_state)
+    student_score = Float(display_name="student_score",
+                          default=-1,
+                          scope=Scope.user_state)
 
     display_name = String(display_name="display_name",
                           default="Editor de Python",
@@ -43,9 +43,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                           help="Nome do componente na plataforma")
 
     test_cases = String(display_name="test_cases",
-                        default='[["Manuel", "Como te chamas?Olá, Manuel"], ["X ae A-Xii", "Como te chamas?Olá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?Olá, Menino Joãozinho"]]',
+                        default='[["Manuel", "Como te chamas?\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\nOlá, Menino Joãozinho"]]',
                         scope=Scope.content,
                         help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]")
+
+    last_output = String(display_name="last_output",
+                         default="",
+                         scope=Scope.user_state)
 
     # preferences -> theme and general settings per user
 
@@ -110,6 +114,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
             'result': 'success'
         }
 
+    def save_output(self, output):
+        self.last_output = json.dumps(output)
+        return output
+
     @XBlock.json_handler
     def submit_code(self, data, _suffix):
         self.student_code = data["student_code"]
@@ -131,15 +139,15 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 'stderr': stderr
             }
             if result["exit_code"] != 0 or stdout != expected_output:
-                self.runtime.publish(self, "grade", {"value": 0.0, "max_value": 1.0})
-                return response
+                self._publish_grade(self.get_score())
+                return self.save_output(response)
             ti += 1
         self.student_score = 1
-        self.runtime.publish(self, "grade", {"value": 1.0, "max_value": 1.0})
-        return {
+        self._publish_grade(self.get_score())
+        return self.save_output({
             'result': 'success',
             'message': 'O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
-        }
+        })
 
     @staticmethod
     def workbench_scenarios():
