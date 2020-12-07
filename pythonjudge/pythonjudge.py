@@ -97,7 +97,7 @@ class PythonJudgeXBlock(XBlock):
         for i_o in json.loads(self.test_cases):
             expected_output = i_o[1].replace('\n', ' ').replace('\r', '')
             result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
-            if result.exit_code != 0:
+            if result["exit_code"] != 0:
                 return {
                     'result': 'error',
                     'test_case': ti,
