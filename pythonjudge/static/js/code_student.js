@@ -15,15 +15,15 @@ function PythonJudgeXBlock(runtime, element) {
             'student_code': editor.getValue()
         };
 
-        $('.xblock-editor-error-message', element).html();
-        $('.xblock-editor-error-message', element).css('display', 'none');
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
+        runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
+                runtime.notify('save', {state: 'end', title: gettext("O teu programa passou todos os casos de teste! Parabéns!")});
                 $("#feedback").text(response.message);
             } else {
                 runtime.notify('error', {title: gettext("Erro num dos casos de teste"), message: "O teu programa falhou pelo menos um caso de teste. Vê a janela de output para mais informações."});
-                $("#feedback").text("Erro no caso de teste " + response.test_case + ":\nInput: " + response.input + "\nOutput esperada: " + response.expected_output + "\n=============\nOutput do teu programa: " + response.student_output)
+                $("#feedback").text("Erro no caso de teste " + response.test_case + ":<br/>Input: " + response.input + "<br/>Output esperada: " + response.expected_output + "<br/>=============<br/>Output do teu programa: " + response.student_output)
             }
         });
     });

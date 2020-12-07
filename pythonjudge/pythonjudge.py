@@ -120,7 +120,7 @@ class PythonJudgeXBlock(XBlock):
             ti += 1
         return {
             'result': 'success',
-            'message': 'Parabéns! O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
+            'message': 'O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
         }
 
     @staticmethod

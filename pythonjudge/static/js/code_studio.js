@@ -22,6 +22,7 @@ function PythonJudgeXBlock(runtime, element) {
         };
 
         const handlerUrl = runtime.handlerUrl(element, 'save_settings');
+        runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
                 runtime.notify('save', {state: 'end'});
