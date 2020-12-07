@@ -32,7 +32,7 @@ function PythonJudgeXBlock(runtime, element) {
     });
 
     //autosave every 10 seconds
-    let previous_code = "";
+    let previous_code = editor.getValue();
     const autosave_handlerurl = runtime.handlerUrl(element, 'autosave_code');
     setInterval(() => {
         if (previous_code !== editor.getValue()){

@@ -1,4 +1,5 @@
 import pkg_resources
+from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.core import XBlock
 from xblock.fields import Scope, String
 from web_fragments.fragment import Fragment
@@ -21,7 +22,7 @@ def clean_std(std):
     return str(std).strip(" \n").replace('\n', '<br/>').replace('\r', '')
 
 
-class PythonJudgeXBlock(XBlock):
+class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
                           scope=Scope.content,
@@ -31,6 +32,10 @@ class PythonJudgeXBlock(XBlock):
                           default="",
                           scope=Scope.user_state,
                           help="A submissão do utilizador para este problema")
+
+    student_score = String(display_name="student_score",
+                           default=-1,
+                           scope=Scope.user_state)
 
     display_name = String(display_name="display_name",
                           default="Editor de Python",
@@ -142,3 +147,15 @@ class PythonJudgeXBlock(XBlock):
                 </vertical_demo>
              """),
         ]
+
+    def has_submitted_answer(self):
+        return self.student_score != -1
+
+    def get_score(self):
+        return Score(raw_earned=max(self.student_score, 0), raw_possible=1)
+
+    def set_score(self, score):
+        self.student_score = score.raw_earned / score.raw_possible
+
+    def calculate_score(self):
+        return self.get_score()
