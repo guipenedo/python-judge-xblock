@@ -14,7 +14,7 @@ epicbox.configure(
 limits = {'cputime': 1, 'memory': 64}
 
 
-def clean_std(std):
+def clean_stdout(std):
     try:
         std = std.decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
@@ -126,10 +126,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
         ti = 1
         for i_o in json.loads(self.test_cases):
-            expected_output = clean_std(i_o[1])
+            expected_output = clean_stdout(i_o[1])
             result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
-            stdout = clean_std(result["stdout"])
-            stderr = clean_std(result["stderr"])
+            stdout = clean_stdout(result["stdout"])
+            stderr = clean_stdout(result["stderr"])
             response = {
                 'result': 'error',
                 'exit_code': result["exit_code"],
@@ -148,6 +148,22 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         return self.save_output({
             'result': 'success',
             'message': 'O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
+        })
+
+    @XBlock.json_handler
+    def run_code(self, data, _suffix):
+        self.student_code = data["student_code"]
+        input = data["input"]
+        files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
+
+        result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
+        stdout = clean_stdout(result["stdout"])
+        stderr = clean_stdout(result["stderr"])
+        return self.save_output({
+            'result': 'success',
+            'exit_code': result["exit_code"],
+            'stdout': stdout,
+            'stderr': stderr
         })
 
     @staticmethod
