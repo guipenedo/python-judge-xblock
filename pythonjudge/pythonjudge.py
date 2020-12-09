@@ -73,7 +73,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
         frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_student.js"))
-        frag.initialize_js('PythonJudgeXBlock', {"last_output": self.last_output})
+        frag.initialize_js('PythonJudgeXBlock', {"last_output": json.loads(self.last_output)})
         return frag
 
     def studio_view(self, _context):
@@ -88,7 +88,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
         frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_studio.js"))
-        frag.initialize_js('PythonJudgeXBlock', {"last_output": self.last_output})
+        frag.initialize_js('PythonJudgeXBlock', {"last_output": json.loads(self.last_output)})
         return frag
 
     @XBlock.json_handler
