@@ -52,6 +52,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                          scope=Scope.user_state)
 
     icon_class = 'problem'
+    has_score = True
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -72,7 +73,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
         frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_student.js"))
-        frag.initialize_js('PythonJudgeXBlock')
+        frag.initialize_js('PythonJudgeXBlock', {"last_output": self.last_output})
         return frag
 
     def studio_view(self, _context):
@@ -87,7 +88,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
         frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
         frag.add_javascript(self.resource_string("static/js/code_studio.js"))
-        frag.initialize_js('PythonJudgeXBlock')
+        frag.initialize_js('PythonJudgeXBlock', {"last_output": self.last_output})
         return frag
 
     @XBlock.json_handler
@@ -139,11 +140,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 'stderr': stderr
             }
             if result["exit_code"] != 0 or stdout != expected_output:
-                self._publish_grade(self.get_score())
+                self.runtime.publish(self, "grade", {"value": 0.0, "max_value": 1.0})
                 return self.save_output(response)
             ti += 1
         self.student_score = 1
-        self._publish_grade(self.get_score())
+        self.runtime.publish(self, "grade", {"value": 1.0, "max_value": 1.0})
         return self.save_output({
             'result': 'success',
             'message': 'O teu programa passou em todos os ' + str(ti) + ' casos de teste!'

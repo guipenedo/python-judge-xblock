@@ -28,9 +28,9 @@ setup(
         'pythonjudge',
     ],
     install_requires=[
-        'XBlock','epicbox'
+        'XBlock', 'epicbox'
     ],
-    dependency_links = [
+    dependency_links=[
         'git+https://github.com/StepicOrg/epicbox.git',
     ],
     entry_points={
