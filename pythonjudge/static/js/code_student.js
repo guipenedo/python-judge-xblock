@@ -32,7 +32,7 @@ function PythonJudgeXBlock(runtime, element, data) {
         $(element).find('#code-runner').hide();
         $(element).find('#run').show();
         const data = {
-            'student_code': editor.getValue()
+            'input': editor.getValue()
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
