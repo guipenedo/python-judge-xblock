@@ -59,6 +59,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin):
                          scope=Scope.user_state)
 
     icon_class = 'problem'
+    block_type = 'problem'
 
     def add_fragments(self, frag):
         """
