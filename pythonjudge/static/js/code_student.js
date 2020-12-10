@@ -13,12 +13,12 @@ function PythonJudgeXBlock(runtime, element, data) {
     function outputResponse(response) {
         switchButtons(false);
         if (response.result === 'success') {
-            $("#code-feedback").html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i>" + response.message);
+            $("#code-feedback").html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
         } else {
             if (response.exit_code === 0 && !response.stderr)
-                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span><b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
+                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
             else
-                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span><b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
+                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
         }
     }
 
