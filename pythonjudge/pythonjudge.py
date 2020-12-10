@@ -1,4 +1,5 @@
 import pkg_resources
+from xblock.completable import CompletableXBlockMixin
 from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Float
@@ -28,7 +29,7 @@ def resource_string(path):
     return data.decode("utf8")
 
 
-class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
+class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
                           scope=Scope.content,
@@ -58,9 +59,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                          scope=Scope.user_state)
 
     icon_class = 'problem'
-    has_score = True
 
     def add_fragments(self, frag):
+        """
+            Add necessary css and js imports. Initialize last student output
+        :param frag:
+        :return:
+        """
         frag.add_css(resource_string("static/css/code.css"))
         frag.add_javascript(resource_string("static/js/ace/ace.js"))
         frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
@@ -75,8 +80,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
 
     def student_view(self, _context):
         """
-        The primary view of the PythonJudgeXBlock, shown to students
-        when viewing courses.
+            The view students see
+        :param _context:
+        :return:
         """
         if not self.student_code:
             self.student_code = self.initial_code
@@ -88,8 +94,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
 
     def studio_view(self, _context):
         """
-        The primary view of the paellaXBlock, shown to students
-        when viewing courses.
+            The view for settings edition on studio
+        :param _context:
+        :return:
         """
         html = resource_string("static/html/code_edit.html")
         frag = Fragment(html.format(self=self))
@@ -99,6 +106,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
 
     @XBlock.json_handler
     def save_settings(self, data, _suffix):
+        """
+            Json handler for ajax post requests modifying the xblock's settings
+        :param data:
+        :param _suffix:
+        :return:
+        """
         self.display_name = data["display_name"]
         self.initial_code = data["initial_code"]
         try:
@@ -115,6 +128,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
 
     @XBlock.json_handler
     def autosave_code(self, data, _suffix):
+        """
+            Json Handler for automated periodic ajax requests to save the student's code
+        :param data:
+        :param _suffix:
+        :return:
+        """
         if data["student_code"] != self.student_code:
             self.student_code = data["student_code"]
         return {
@@ -122,12 +141,34 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         }
 
     def save_output(self, output):
+        """
+            Cache user's last submission's output
+        :param output:
+        :return:
+        """
         self.last_output = json.dumps(output)
-        return output
 
     @XBlock.json_handler
     def submit_code(self, data, _suffix):
+        """
+            Triggered when the user presses the submit button.
+            We set student_score=0 to count as "has_submitted" and then call rescore
+            which then calls our calculate_score method
+        :param data:
+        :param _suffix:
+        :return:
+        """
         self.student_code = data["student_code"]
+        self.student_score = 0
+        # rescore even if the score lowers
+        self.rescore(False)
+        return json.loads(self.last_output)
+
+    def evaluate_submission(self):
+        """
+            Evaluate this student's latest submission with our test cases
+        :return:
+        """
         self.student_score = 0
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
         ti = 1
@@ -146,18 +187,27 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 'stderr': stderr
             }
             if result["exit_code"] != 0 or stdout.replace("<br/>", "") != expected_output.replace("<br/>", ""):
-                self.runtime.publish(self, "grade", {"value": 0.0, "max_value": 1.0})
-                return self.save_output(response)
+                self.save_output(response)
+                # completion interface
+                self.emit_completion(0.0)
+                return
             ti += 1
         self.student_score = 1
-        self.runtime.publish(self, "grade", {"value": 1.0, "max_value": 1.0})
-        return self.save_output({
+        # completion interface
+        self.emit_completion(1.0)
+        self.save_output({
             'result': 'success',
-            'message': 'O teu programa passou em todos os ' + str(ti-1) + ' casos de teste!'
+            'message': 'O teu programa passou em todos os ' + str(ti - 1) + ' casos de teste!'
         })
 
     @XBlock.json_handler
     def run_code(self, data, _suffix):
+        """
+            Triggered when the "run code" button is pressed. Tests the program against user defined input
+        :param data:
+        :param _suffix:
+        :return:
+        """
         self.student_code = data["student_code"]
         input = data["input"]
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
@@ -172,31 +222,15 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
             'stderr': stderr
         })
 
-    @staticmethod
-    def workbench_scenarios():
-        """A canned scenario for display in the workbench."""
-        return [
-            ("PythonJudgeXBlock",
-             """<vertical_demo>
-                <pdf/>
-                </vertical_demo>
-             """),
-        ]
-
     def has_submitted_answer(self):
         return self.student_score != -1
 
     def get_score(self):
-        return Score(raw_earned=max(self.student_score, 0), raw_possible=1)
+        return Score(raw_earned=max(self.student_score, 0.0), raw_possible=1.0)
 
     def set_score(self, score):
         self.student_score = score.raw_earned / score.raw_possible
 
     def calculate_score(self):
-        if self.student_score != -1:
-            data = {
-                "student_code": self.student_code
-            }
-            # reavaliar submissão com os vários casos de teste
-            self.submit_code(data)
+        self.evaluate_submission()
         return self.get_score()
