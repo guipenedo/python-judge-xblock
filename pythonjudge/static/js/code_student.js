@@ -32,7 +32,7 @@ function PythonJudgeXBlock(runtime, element, data) {
         $(element).find('#code-runner').hide();
         $(element).find('#run').show();
         const data = {
-            'input': editor.getValue()
+            'student_code': editor.getValue()
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
@@ -47,7 +47,7 @@ function PythonJudgeXBlock(runtime, element, data) {
 
     $(element).find('#code-runner-button').bind('click', function () {
         const data = {
-            'student_code': editor.getValue()
+            'input': editor.getValue()
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'run_code');
