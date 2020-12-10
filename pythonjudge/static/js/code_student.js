@@ -11,6 +11,7 @@ function PythonJudgeXBlock(runtime, element, data) {
     });
 
     function outputResponse(response) {
+        $(element).find('#submit').prop( "disabled", false );
         if (response.result === 'success') {
             runtime.notify('save', {
                 state: 'end',
@@ -33,7 +34,7 @@ function PythonJudgeXBlock(runtime, element, data) {
         const data = {
             'student_code': editor.getValue()
         };
-
+        $(this).prop( "disabled", true );
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
         runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(outputResponse);
