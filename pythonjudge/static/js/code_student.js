@@ -25,7 +25,7 @@ function PythonJudgeXBlock(runtime, element, data) {
     function switchButtons(disabled){
         $(element).find('#submit').prop("disabled", disabled);
         $(element).find('#run').prop("disabled", disabled);
-        $(element).find('#code-runner').prop("disabled", disabled);
+        $(element).find('#code-runner-button').prop("disabled", disabled);
     }
 
     $(element).find('#submit').bind('click', function() {
