@@ -153,7 +153,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         self.runtime.publish(self, "grade", {"value": 1.0, "max_value": 1.0})
         return self.save_output({
             'result': 'success',
-            'message': 'O teu programa passou em todos os ' + str(ti) + ' casos de teste!'
+            'message': 'O teu programa passou em todos os ' + str(ti-1) + ' casos de teste!'
         })
 
     @XBlock.json_handler
@@ -193,4 +193,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         self.student_score = score.raw_earned / score.raw_possible
 
     def calculate_score(self):
+        if self.student_score != -1:
+            data = {
+                "student_code": self.student_code
+            }
+            # reavaliar submissão com os vários casos de teste
+            self.submit_code(data)
         return self.get_score()

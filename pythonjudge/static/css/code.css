@@ -55,3 +55,9 @@
     border-radius: 5px;
 }
 
+#code-feedback {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
