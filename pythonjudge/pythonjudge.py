@@ -145,7 +145,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
                 'student_output': stdout,
                 'stderr': stderr
             }
-            if result["exit_code"] != 0 or stdout != expected_output:
+            if result["exit_code"] != 0 or stdout.replace("<br/>", "") != expected_output.replace("<br/>", ""):
                 self.runtime.publish(self, "grade", {"value": 0.0, "max_value": 1.0})
                 return self.save_output(response)
             ti += 1
