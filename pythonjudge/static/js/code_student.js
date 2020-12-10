@@ -47,20 +47,20 @@ function PythonJudgeXBlock(runtime, element, data) {
 
     $(element).find('#code-runner-button').bind('click', function () {
         const data = {
-            'input': editor.getValue()
+            'student_code': editor.getValue(),
+            'input': $(element).find('#code-runner-input').text()
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'run_code');
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             switchButtons(false);
-            if (response.result === 'success') {
-                if (response.exit_code === 0 && !response.stderr)
-                    $("#code-runner-output").html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + response.stdout +"<br /><b>Stderr:</b> " + response.stderr);
-                else
-                    $("#code-runner-output").html(response.stdout);
-            } else {
-                $("#code-runner-output").text("Erro desconhecido. Por favor tenta novamente mais tarde.");
-            }
+            if (response.exit_code === 0 && !response.stderr)
+                $("#code-runner-output").html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + response.stdout +"<br /><b>Stderr:</b> " + response.stderr);
+            else
+                $("#code-runner-output").html(response.stdout);
+        }).fail(function () {
+            switchButtons(false);
+            $("#code-runner-output").text("Erro desconhecido. Por favor tenta novamente mais tarde.");
         });
     });
 
