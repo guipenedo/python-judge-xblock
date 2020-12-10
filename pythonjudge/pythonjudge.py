@@ -158,8 +158,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
 
     @XBlock.json_handler
     def run_code(self, data, _suffix):
-        self.student_code = data["student_code"]
-        input = data["input"]
+        self.student_code = data["input"]
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
 
         result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
