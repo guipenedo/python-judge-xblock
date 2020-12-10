@@ -22,6 +22,12 @@ def clean_stdout(std):
     return str(std).strip(" \n").replace('\n', '<br/>').replace('\r', '<br/>')
 
 
+def resource_string(path):
+    """Handy helper for getting resources from our kit."""
+    data = pkg_resources.resource_string(__name__, path)
+    return data.decode("utf8")
+
+
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
@@ -54,10 +60,18 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
     icon_class = 'problem'
     has_score = True
 
-    def resource_string(self, path):
-        """Handy helper for getting resources from our kit."""
-        data = pkg_resources.resource_string(__name__, path)
-        return data.decode("utf8")
+    def add_fragments(self, frag):
+        frag.add_css(resource_string("static/css/code.css"))
+        frag.add_javascript(resource_string("static/js/ace/ace.js"))
+        frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
+        frag.add_javascript(resource_string("static/js/ace/theme-monokai.js"))
+        data = {}
+        if self.last_output:
+            try:
+                data = {"last_output": json.loads(self.last_output)}
+            except ValueError:
+                pass
+        frag.initialize_js('PythonJudgeXBlock', data)
 
     def student_view(self, _context):
         """
@@ -66,14 +80,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         """
         if not self.student_code:
             self.student_code = self.initial_code
-        html = self.resource_string("static/html/code.html")
+        html = resource_string("static/html/code.html")
         frag = Fragment(html.format(self=self))
-        frag.add_css(self.resource_string("static/css/code.css"))
-        frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
-        frag.add_javascript(self.resource_string("static/js/code_student.js"))
-        frag.initialize_js('PythonJudgeXBlock', {"last_output": json.loads(self.last_output)})
+        frag.add_javascript(resource_string("static/js/code_student.js"))
+        self.add_fragments(frag)
         return frag
 
     def studio_view(self, _context):
@@ -81,14 +91,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin):
         The primary view of the paellaXBlock, shown to students
         when viewing courses.
         """
-        html = self.resource_string("static/html/code_edit.html")
+        html = resource_string("static/html/code_edit.html")
         frag = Fragment(html.format(self=self))
-        frag.add_css(self.resource_string("static/css/code.css"))
-        frag.add_javascript(self.resource_string("static/js/ace/ace.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/mode-python.js"))
-        frag.add_javascript(self.resource_string("static/js/ace/theme-monokai.js"))
-        frag.add_javascript(self.resource_string("static/js/code_studio.js"))
-        frag.initialize_js('PythonJudgeXBlock', {"last_output": json.loads(self.last_output)})
+        frag.add_javascript(resource_string("static/js/code_studio.js"))
+        self.add_fragments(frag)
         return frag
 
     @XBlock.json_handler
