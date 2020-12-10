@@ -1,14 +1,32 @@
+<link rel="stylesheet"  href="../css/code.css"/>
 <div id="student_code">{self.student_code}</div>
+<div id="code-runner" style="display:none;">
+    <label for="code-runner-input">Input de teste:</label>
+    <div id="code-runner-block">
+        <textarea autocapitalize="off" class="input" id="code-runner-input"
+                  spellcheck="false"></textarea>
+        <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo"
+                data-value="Correr código" id="code-runner-button"
+                type="button">
+            <span class="submit-label">Correr código</span>
+            <span aria-hidden="true" class="icon fa fa-terminal"></span>
+        </button>
+    </div>
+    <div class="code-runner-footer">
+        <label for="code-runner-output">Output de teste:</label>
+        <pre id="code-runner-output"></pre>
+    </div>
+</div>
 <div id="action">
-    <button id="submit" type="button" class="submit btn-upgrade" data-submitting="A submeter" data-value="Submeter"
-            data-should-enable-submit-button="True">
+    <button class="submit btn-upgrade" data-should-enable-submit-button="True" data-submitting="A submeter" data-value="Submeter" id="submit"
+            type="button">
         <span class="submit-label">Submeter</span>
-        <span class="icon fa fa-terminal" aria-hidden="true"></span>
+        <span aria-hidden="true" class="icon fa fa-caret-right"></span>
     </button>
-    <button id="run" type="button" class="submit btn-brand" data-submitting="Correndo" data-value="Correr código"
-            data-should-enable-submit-button="True">
+    <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo" data-value="Correr código" id="run"
+            type="button">
         <span class="submit-label">Correr código</span>
-        <span class="icon fa fa-caret-right" aria-hidden="true"></span>
+        <span aria-hidden="true" class="icon fa fa-terminal"></span>
     </button>
 </div>
 <div id="feedback"></div>
