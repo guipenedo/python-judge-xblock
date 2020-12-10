@@ -35,6 +35,8 @@
     height: 58px;
     background-color: white;
     width: 100%;
+    resize: none;
+    box-sizing: border-box;
 }
 
 #code-runner-button {
