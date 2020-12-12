@@ -216,12 +216,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin):
         result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
         stdout = clean_stdout(result["stdout"])
         stderr = clean_stdout(result["stderr"])
-        return self.save_output({
+        return {
             'result': 'success',
             'exit_code': result["exit_code"],
             'stdout': stdout,
             'stderr': stderr
-        })
+        }
 
     def has_submitted_answer(self):
         return self.student_score != -1
