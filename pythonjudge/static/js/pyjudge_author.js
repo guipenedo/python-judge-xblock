@@ -3,8 +3,7 @@ function PythonJudgeXBlock(runtime, element) {
         runtime.notify('cancel', {});
     });
 
-    let editor = ace.edit("initial_code");
-    editor.setOptions({
+    let options = {
         maxLines: 50,
         minLines: 10,
         autoScrollEditorIntoView: true,
@@ -12,13 +11,16 @@ function PythonJudgeXBlock(runtime, element) {
         showPrintMargin: false,
         mode: "ace/mode/python",
         fontSize: "14pt"
-    });
+    };
+    let editor_initial = ace.edit("initial_code");
+    editor_initial.setOptions(options);
+    let editor_grader = ace.edit("grader_code");
+    editor_grader.setOptions(options);
 
     $(element).find('.save-button').bind('click', function() {
         const data = {
-            'initial_code': editor.getValue(),
-            'display_name': $(display_name).context.value,
-            'test_cases': $(test_cases).context.value
+            'initial_code': editor_initial.getValue(),
+            'grader_code': editor_grader.getValue(),
         };
 
         const handlerUrl = runtime.handlerUrl(element, 'save_settings');
