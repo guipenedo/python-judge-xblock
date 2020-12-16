@@ -187,7 +187,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.student_score = 0
         simple_grading = self.grade_mode == 'input/output'
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
-        if simple_grading:
+        if not simple_grading:
             files.append({'name': 'grader.py', 'content': bytes(self.grader_code, 'utf-8')})
         ti = 1
         grade_sum = 0
