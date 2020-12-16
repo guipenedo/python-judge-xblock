@@ -80,6 +80,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     editable_fields = ('display_name', 'grade_mode', 'partial_grading', 'test_cases')
     icon_class = 'problem'
     block_type = 'problem'
+    has_author_view = True
 
     def add_fragments(self, frag):
         """
