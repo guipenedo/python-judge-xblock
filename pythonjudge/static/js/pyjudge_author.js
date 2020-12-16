@@ -17,7 +17,7 @@ function PythonJudgeXBlock(runtime, element) {
     let editor_grader = ace.edit("grader_code");
     editor_grader.setOptions(options);
 
-    $(element).find('.save-button').bind('click', function() {
+    $(element).find('#save-button').bind('click', function() {
         const data = {
             'initial_code': editor_initial.getValue(),
             'grader_code': editor_grader.getValue(),
