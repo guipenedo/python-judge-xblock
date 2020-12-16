@@ -57,7 +57,7 @@ function PythonJudgeXBlock(runtime, element, data) {
             if (response.exit_code === 0 && !response.stderr)
                 $("#code-runner-output").html(response.stdout);
             else
-                $("#code-runner-output").html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + response.stdout + "<br /><b>Stderr:</b> " + response.stderr);
+                $("#code-runner-output").html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + (response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + response.stderr);
 
         }).fail(function () {
             switchButtons(false);
