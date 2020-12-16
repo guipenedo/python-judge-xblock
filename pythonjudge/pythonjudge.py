@@ -123,7 +123,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
     def validate_field_data(self, validation, data):
         try:
-            json.loads(data["test_cases"])
+            json.loads(data.test_cases)
         except ValueError:
             validation.add(ValidationMessage(ValidationMessage.ERROR, u"test_cases tem que ser uma lista de json válida!"))
 
