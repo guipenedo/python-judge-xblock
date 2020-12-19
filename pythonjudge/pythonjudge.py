@@ -36,12 +36,12 @@ def resource_string(path):
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, StudioEditableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
-                          scope=Scope.content,
+                          scope=Scope.settings,
                           help="O código inicial para este problema")
 
     grader_code = String(display_name="initial_code",
                           default="import main\n\nlista = [int(x) for x in input().split()]\n# os graders recebem a output esperada (se esta existir) a seguir à input\nresult = int(input())\n\n# exemplo: uma função que conta o número de inteiros pares numa lista\nif result == main.conta_pares(lista):\n    print(1.0)\nelse:\n    print(0.0)",
-                          scope=Scope.content,
+                          scope=Scope.settings,
                           help="O código do grader")
 
     student_code = String(display_name="student_code",
@@ -139,9 +139,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         self.initial_code = data["initial_code"]
         self.grader_code = data["grader_code"]
-        #force save
-        self.force_save_fields(["initial_code", "grader_code"])
-        self.runtime.save_block(self)
         return {
             'result': 'success'
         }
