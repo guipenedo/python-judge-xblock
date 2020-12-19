@@ -135,8 +135,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
+        print(data)
         self.initial_code = data["initial_code"]
         self.grader_code = data["grader_code"]
+        self.save()
         return {
             'result': 'success',
         }
