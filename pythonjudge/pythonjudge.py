@@ -139,10 +139,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         self.initial_code = data["initial_code"]
         self.grader_code = data["grader_code"]
-        self.save()
+        #force save
+        self.force_save_fields(["initial_code", "grader_code"])
+        self.runtime.save_block(self)
         return {
-            'result': 'success',
-            'data': data
+            'result': 'success'
         }
 
     @XBlock.json_handler
