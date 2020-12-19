@@ -9,6 +9,8 @@ from web_fragments.fragment import Fragment
 import json
 import epicbox
 
+ITEM_TYPE = "pyjudge"
+
 epicbox.configure(
     profiles=[
         epicbox.Profile('python', 'python:3.10.0a2-alpine3.12')
@@ -135,12 +137,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        print(data)
         self.initial_code = data["initial_code"]
         self.grader_code = data["grader_code"]
         self.save()
         return {
             'result': 'success',
+            'data': data
         }
 
     @XBlock.json_handler
@@ -263,6 +265,21 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             'exit_code': result["exit_code"],
             'stdout': stdout,
             'stderr': stderr
+        }
+
+    def get_student_item_dict(self, student_id=None):
+        # pylint: disable=no-member
+        """
+        Returns dict required by the submissions app for creating and
+        retrieving submissions for a particular student.
+        """
+        if student_id is None:
+            student_id = self.xmodule_runtime.anonymous_student_id
+        return {
+            "student_id": student_id,
+            "course_id": self.block_course_id,
+            "item_id": self.block_id,
+            "item_type": ITEM_TYPE,
         }
 
     def has_submitted_answer(self):
