@@ -1,23 +1,23 @@
-#initial_code, #student_code {
+.initial_code, .student_code {
     height: 200px;
     border: 1px solid lightgray;
     margin: auto;
 }
 
-#student_code {
+.student_code {
     width: 100%;
 }
 
-#initial_code {
+.initial_code {
     width: 80%;
 }
 
-#action {
+.action {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-#code-runner {
+.code-runner {
     margin: 0;
     background-color: #eee;
     color: #5e5e5e;
@@ -25,13 +25,13 @@
     border: 2px solid #ccc;
 }
 
-#code-runner-block {
+.code-runner-block {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
 }
 
-#code-runner-input {
+.code-runner-input {
     height: 60px;
     background-color: white;
     width: 100%;
@@ -40,7 +40,7 @@
     margin-top:1px;
 }
 
-#code-runner-button {
+.code-runner-button {
     margin-left: .5em;
     display: inline-flex;
     flex-direction: row;
@@ -48,14 +48,14 @@
     align-items: center;
 }
 
-#code-runner-output {
+.code-runner-output {
     padding: 10px;
     background: #333;
     color: #fff;
     border-radius: 5px;
 }
 
-#code-feedback {
+.code-feedback {
     margin: 10px 0;
     padding: 10px;
     border-radius: 5px;

@@ -1,7 +1,5 @@
 function PythonJudgeXBlock(runtime, element) {
-    $(element).find('.cancel-button').bind('click', function() {
-        runtime.notify('cancel', {});
-    });
+    let id = context.xblock_id;
 
     let options = {
         maxLines: 50,
@@ -12,12 +10,12 @@ function PythonJudgeXBlock(runtime, element) {
         mode: "ace/mode/python",
         fontSize: "14pt"
     };
-    let editor_initial = ace.edit("initial_code");
+    let editor_initial = ace.edit("initial_code_" + id);
     editor_initial.setOptions(options);
-    let editor_grader = ace.edit("grader_code");
+    let editor_grader = ace.edit("grader_code_" + id);
     editor_grader.setOptions(options);
 
-    $(element).find('#save-button').bind('click', function() {
+    $(element).find('#save-button_' + id).bind('click', function() {
         const data = {
             'initial_code': editor_initial.getValue(),
             'grader_code': editor_grader.getValue(),

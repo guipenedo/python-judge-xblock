@@ -88,7 +88,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     block_type = 'problem'
     has_author_view = True
 
-    def add_fragments(self, frag):
+    def add_styling_and_editor(self, frag):
         """
             Add necessary css and js imports. Initialize last student output
         :param frag:
@@ -98,13 +98,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         frag.add_javascript(resource_string("static/js/ace/ace.js"))
         frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
         frag.add_javascript(resource_string("static/js/ace/theme-monokai.js"))
-        data = {}
-        if self.last_output:
-            try:
-                data = {"last_output": json.loads(self.last_output)}
-            except ValueError:
-                pass
-        frag.initialize_js('PythonJudgeXBlock', data)
 
     def student_view(self, _context):
         """
@@ -114,21 +107,38 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         if not self.student_code:
             self.student_code = self.initial_code
-        html = resource_string("static/html/pyjudge_student.html")
-        frag = Fragment(html.format(self=self))
+
+        html = loader.render_django_template('static/html/pyjudge_student.html', {
+            'student_code': self.student_code,
+            'xblock_id': self._get_xblock_loc()
+        })
+        frag = Fragment(html)
+
         frag.add_javascript(resource_string("static/js/pyjudge_student.js"))
-        self.add_fragments(frag)
+
+        data = {'xblock_id': self._get_xblock_loc()}
+        if self.last_output:
+            try:
+                data["last_output"] = json.loads(self.last_output)
+            except ValueError:
+                pass
+
+        frag.initialize_js('PythonJudgeXBlock', data)
+
+        self.add_styling_and_editor(frag)
         return frag
 
     def author_view(self, _context):
         html = loader.render_django_template('static/html/pyjudge_author.html', {
             'initial_code': self.initial_code,
             'grader_code': self.grader_code,
-            'uses_grader': self.grade_mode != 'input/output'
+            'uses_grader': self.grade_mode != 'input/output',
+            'xblock_id': self._get_xblock_loc()
         })
-        frag = Fragment(html.format(self=self))
+        frag = Fragment(html)
+        self.add_styling_and_editor(frag)
         frag.add_javascript(resource_string("static/js/pyjudge_author.js"))
-        self.add_fragments(frag)
+        frag.initialize_js('PythonJudgeXBlock', {'xblock_id': self._get_xblock_loc()})
         return frag
 
     def validate_field_data(self, validation, data):

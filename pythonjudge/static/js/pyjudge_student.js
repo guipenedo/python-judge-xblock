@@ -1,5 +1,7 @@
-function PythonJudgeXBlock(runtime, element, data) {
-    let editor = ace.edit("student_code");
+function PythonJudgeXBlock(runtime, element, context) {
+    let id = context.xblock_id;
+
+    let editor = ace.edit("student_code_" + id);
     editor.setOptions({
         maxLines: 50,
         minLines: 10,
@@ -13,24 +15,24 @@ function PythonJudgeXBlock(runtime, element, data) {
     function outputResponse(response) {
         switchButtons(false);
         if (response.result === 'success') {
-            $("#code-feedback").html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
+            $("#code-feedback_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
         } else {
             if (response.exit_code === 0 && !response.stderr)
-                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
+                $("#code-feedback_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
             else
-                $("#code-feedback").html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
+                $("#code-feedback_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
         }
     }
 
     function switchButtons(disabled){
-        $(element).find('#submit').prop("disabled", disabled);
-        $(element).find('#run').prop("disabled", disabled);
-        $(element).find('#code-runner-button').prop("disabled", disabled);
+        $(element).find('#submit_' + id).prop("disabled", disabled);
+        $(element).find('#run_' + id).prop("disabled", disabled);
+        $(element).find('#code-runner-button_' + id).prop("disabled", disabled);
     }
 
-    $(element).find('#submit').bind('click', function() {
-        $(element).find('#code-runner').hide();
-        $(element).find('#run').show();
+    $(element).find('#submit_' + id).bind('click', function() {
+        $(element).find('#code-runner_' + id).hide();
+        $(element).find('#run_' + id).show();
         const data = {
             'student_code': editor.getValue()
         };
@@ -40,28 +42,28 @@ function PythonJudgeXBlock(runtime, element, data) {
     });
 
 
-    $(element).find('#run').bind('click', function () {
+    $(element).find('#run_' + id).bind('click', function () {
         $(this).hide();
-        $(element).find('#code-runner').show();
+        $(element).find('#code-runner_' + id).show();
     });
 
-    $(element).find('#code-runner-button').bind('click', function () {
+    $(element).find('#code-runner-button_' + id).bind('click', function () {
         const data = {
             'student_code': editor.getValue(),
-            'input': $('#code-runner-input').val()
+            'input': $('#code-runner-input_' + id).val()
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'run_code');
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             switchButtons(false);
             if (response.exit_code === 0 && !response.stderr)
-                $("#code-runner-output").html(response.stdout);
+                $("#code-runner-output_" + id).html(response.stdout);
             else
-                $("#code-runner-output").html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + (response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + response.stderr);
+                $("#code-runner-output_" + id).html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + (response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + response.stderr);
 
         }).fail(function () {
             switchButtons(false);
-            $("#code-runner-output").text("Erro desconhecido. Por favor tenta novamente mais tarde.");
+            $("#code-runner-output_" + id).text("Erro desconhecido. Por favor tenta novamente mais tarde.");
         });
     });
 
