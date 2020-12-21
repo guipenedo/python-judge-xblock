@@ -8,6 +8,9 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from web_fragments.fragment import Fragment
 import json
 import epicbox
+from xblockutils.resources import ResourceLoader
+
+loader = ResourceLoader(__name__)
 
 ITEM_TYPE = "pyjudge"
 
@@ -17,6 +20,7 @@ epicbox.configure(
     ]
 )
 limits = {'cputime': 1, 'memory': 64}
+
 
 
 def clean_stdout(std):
@@ -117,7 +121,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         return frag
 
     def author_view(self, _context):
-        html = resource_string("static/html/pyjudge_author.html")
+        html = loader.render_django_template('static/html/pyjudge_author.html', {
+            'initial_code': self.initial_code,
+            'grader_code': self.grader_code,
+            'uses_grader': self.grade_mode != 'input/output'
+        })
         frag = Fragment(html.format(self=self))
         frag.add_javascript(resource_string("static/js/pyjudge_author.js"))
         self.add_fragments(frag)
