@@ -81,6 +81,6 @@ function PythonJudgeXBlock(runtime, element, context) {
     }, 10*1000);
 
 
-    if (data.last_output)
-        outputResponse(data.last_output)
+    if (context.last_output)
+        outputResponse(context.last_output)
 }
