@@ -138,7 +138,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         frag = Fragment(html)
         self.add_styling_and_editor(frag)
         frag.add_javascript(resource_string("static/js/pyjudge_author.js"))
-        frag.initialize_js('PythonJudgeXBlock', {'xblock_id': self._get_xblock_loc()})
+        frag.initialize_js('PythonJudgeXBlock', {'xblock_id': self._get_xblock_loc(),
+                                                 'uses_grader': self.grade_mode != 'input/output'})
         return frag
 
     def validate_field_data(self, validation, data):
