@@ -1,14 +1,14 @@
 <div class="wrapper-comp-settings is-active editor-with-buttons" >
     <ul class="list-input settings-list">
         <li class="field comp-setting-entry is-set">
-            <div class="wrapper-comp-setting"><label class="label setting-label" for="initial_code">Initial code</label>
+            <div class="wrapper-comp-setting"><label class="label setting-label" for="initial_code_{{xblock_id}}">Initial code</label>
                 <div id="initial_code_{{xblock_id}}">{{initial_code}}</div>
             </div>
             <span class="tip setting-help">O código inicial para este problema</span>
         </li>
         {% if uses_grader %}
             <li class="field comp-setting-entry is-set">
-                <div class="wrapper-comp-setting"><label class="label setting-label" for="grader_code">Grader code</label>
+                <div class="wrapper-comp-setting"><label class="label setting-label" for="grader_code_{{xblock_id}}">Grader code</label>
                     <div id="grader_code_{{xblock_id}}">{{grader_code}}</div>
                 </div>
                 <span class="tip setting-help">O grader para este problema (grader.py). Deverá chamar uma função do código do aluno (que está no ficheiro main.py) e imprimir para o stdout o resultado [0, 1]. Ignorado se este problema estiver configurado para grading input/output.</span>
