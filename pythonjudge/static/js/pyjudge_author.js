@@ -26,7 +26,6 @@ function PythonJudgeXBlock(runtime, element, context) {
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
                 runtime.notify('save', {state: 'end'});
-                window.location.reload(false);
             } else {
                 runtime.notify('error', {title: gettext("Unable to update settings"), message: response.message});
             }
