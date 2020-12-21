@@ -298,6 +298,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             "item_type": ITEM_TYPE,
         }
 
+    def _get_xblock_loc(self):
+        """Returns trailing number portion of self.location"""
+        return str(self.location).split('@')[-1]
+
     def has_submitted_answer(self):
         return self.student_score != -1
 
