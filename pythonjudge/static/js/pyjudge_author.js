@@ -23,7 +23,7 @@ function PythonJudgeXBlock(runtime, element) {
             'grader_code': editor_grader.getValue(),
         };
 
-        const handlerUrl = runtime.handlerUrl(element, 'save_settings');
+        const handlerUrl = runtime.handlerUrl(element, 'save_settings').replace("/preview", "");
         runtime.notify('save', {state: 'start'});
         $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
             if (response.result === 'success') {
