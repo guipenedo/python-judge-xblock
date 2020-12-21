@@ -1,4 +1,4 @@
-function PythonJudgeXBlock(runtime, element) {
+function PythonJudgeXBlock(runtime, element, context) {
     let id = context.xblock_id;
 
     let options = {
