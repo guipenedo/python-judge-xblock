@@ -307,7 +307,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         assignments = []
         submissions = submissions_api.get_all_submissions(
             self.course_id,
-            self.block_id,
+            self._get_xblock_loc(),
             ITEM_TYPE
         )
 
@@ -339,7 +339,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         return {
             "student_id": student_id,
             "course_id": self.block_course_id,
-            "item_id": self.block_id,
+            "item_id": self._get_xblock_loc(),
             "item_type": ITEM_TYPE,
         }
 
