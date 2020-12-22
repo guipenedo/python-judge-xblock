@@ -38,7 +38,9 @@ function PythonJudgeXBlock(runtime, element, context) {
         };
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
-        $.post(handlerUrl, JSON.stringify(data)).done(outputResponse);
+        $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
+            outputResponse(response);
+        });
     });
 
 
