@@ -1,4 +1,5 @@
 import pkg_resources
+import six
 from xblock.completable import CompletableXBlockMixin
 from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.core import XBlock
@@ -307,8 +308,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """returns student recent assignments sorted on date"""
         assignments = []
         submissions = submissions_api.get_all_submissions(
-            str(self.course_id),
-            self._get_xblock_loc(),
+            self.block_course_id(),
+            self.block_id(),
             ITEM_TYPE
         )
 
@@ -339,10 +340,22 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             student_id = self.xmodule_runtime.anonymous_student_id
         return {
             "student_id": student_id,
-            "course_id": str(self.course_id),
-            "item_id": self._get_xblock_loc(),
+            "course_id": self.block_course_id(),
+            "item_id": self.block_id(),
             "item_type": ITEM_TYPE,
         }
+
+    def block_id(self):
+        """
+        Return the usage_id of the block.
+        """
+        return six.text_type(self.scope_ids.usage_id)
+
+    def block_course_id(self):
+        """
+        Return the course_id of the block.
+        """
+        return six.text_type(self.course_id)
 
     def _get_xblock_loc(self):
         """Returns trailing number portion of self.location"""
