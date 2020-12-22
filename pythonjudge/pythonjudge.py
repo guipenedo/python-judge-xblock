@@ -22,7 +22,7 @@ epicbox.configure(
 limits = {'cputime': 1, 'memory': 64}
 
 
-
+# Utils
 def clean_stdout(std):
     try:
         std = std.decode('utf-8')
@@ -37,6 +37,18 @@ def resource_string(path):
     return data.decode("utf8")
 
 
+def add_styling_and_editor(frag):
+    """
+        Add necessary css and js imports. Initialize last student output
+    :param frag:
+    :return:
+    """
+    frag.add_css(resource_string("static/css/pyjudge.css"))
+    frag.add_javascript(resource_string("static/js/ace/ace.js"))
+    frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
+    frag.add_javascript(resource_string("static/js/ace/theme-monokai.js"))
+
+
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, StudioEditableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
@@ -44,9 +56,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                           help="O código inicial para este problema")
 
     grader_code = String(display_name="initial_code",
-                          default="import main\n\nlista = [int(x) for x in input().split()]\n# os graders recebem a output esperada (se esta existir) a seguir à input\nresult = int(input())\n\n# exemplo: uma função que conta o número de inteiros pares numa lista\nif result == main.conta_pares(lista):\n    print(1.0)\nelse:\n    print(0.0)",
-                          scope=Scope.settings,
-                          help="O código do grader")
+                         default="import main\n\nlista = [int(x) for x in input().split()]\n# os graders recebem a output esperada (se esta existir) a seguir à input\nresult = int(input())\n\n# exemplo: uma função que conta o número de inteiros pares numa lista\nif result == main.conta_pares(lista):\n    print(1.0)\nelse:\n    print(0.0)",
+                         scope=Scope.settings,
+                         help="O código do grader")
 
     student_code = String(display_name="student_code",
                           default="",
@@ -69,9 +81,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                         values=('input/output', 'python grader'))
 
     partial_grading = Boolean(display_name="partial_grading",
-                        default=False,
-                        scope=Scope.content,
-                        help="(Sem efeito para grading input/output). Se verdadeiro, usa como score a média dos scores para cada caso de teste. Se Falso, usa 0 se um caso for != 1 e 1 caso contrário.",)
+                              default=False,
+                              scope=Scope.content,
+                              help="(Sem efeito para grading input/output). Se verdadeiro, usa como score a média dos scores para cada caso de teste. Se Falso, usa 0 se um caso for != 1 e 1 caso contrário.", )
 
     test_cases = String(display_name="test_cases",
                         default='[["Manuel", "Como te chamas?\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\nOlá, Menino Joãozinho"]]',
@@ -88,17 +100,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     block_type = 'problem'
     has_author_view = True
 
-    def add_styling_and_editor(self, frag):
-        """
-            Add necessary css and js imports. Initialize last student output
-        :param frag:
-        :return:
-        """
-        frag.add_css(resource_string("static/css/pyjudge.css"))
-        frag.add_javascript(resource_string("static/js/ace/ace.js"))
-        frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
-        frag.add_javascript(resource_string("static/js/ace/theme-monokai.js"))
-
+    # ----------- Views -----------
     def student_view(self, _context):
         """
             The view students see
@@ -125,7 +127,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
         frag.initialize_js('PythonJudgeXBlock', data)
 
-        self.add_styling_and_editor(frag)
+        add_styling_and_editor(frag)
         return frag
 
     def author_view(self, _context):
@@ -136,7 +138,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             'xblock_id': self._get_xblock_loc()
         })
         frag = Fragment(html)
-        self.add_styling_and_editor(frag)
+        add_styling_and_editor(frag)
         frag.add_javascript(resource_string("static/js/pyjudge_author.js"))
         frag.initialize_js('PythonJudgeXBlock', {'xblock_id': self._get_xblock_loc(),
                                                  'uses_grader': self.grade_mode != 'input/output'})
@@ -146,8 +148,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         try:
             json.loads(data.test_cases)
         except ValueError:
-            validation.add(ValidationMessage(ValidationMessage.ERROR, u"test_cases tem que ser uma lista de json válida!"))
+            validation.add(
+                ValidationMessage(ValidationMessage.ERROR, u"test_cases tem que ser uma lista de json válida!"))
 
+    # ----------- Handlers -----------
     @XBlock.json_handler
     def save_settings(self, data, _suffix):
         """
@@ -176,14 +180,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             'result': 'success'
         }
 
-    def save_output(self, output):
-        """
-            Cache user's last submission's output
-        :param output:
-        :return:
-        """
-        self.last_output = json.dumps(output)
-
     @XBlock.json_handler
     def submit_code(self, data, _suffix):
         """
@@ -200,6 +196,29 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.rescore(False)
         return json.loads(self.last_output)
 
+    @XBlock.json_handler
+    def run_code(self, data, _suffix):
+        """
+            Triggered when the "run code" button is pressed. Tests the program against user defined input
+        :param data:
+        :param _suffix:
+        :return:
+        """
+        self.student_code = data["student_code"]
+        input = data["input"]
+        files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
+
+        result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
+        stdout = clean_stdout(result["stdout"])
+        stderr = clean_stdout(result["stderr"])
+        return {
+            'result': 'success',
+            'exit_code': result["exit_code"],
+            'stdout': stdout,
+            'stderr': stderr
+        }
+
+    #  ----------- Evaluation -----------
     def evaluate_submission(self):
         """
             Evaluate this student's latest submission with our test cases
@@ -218,7 +237,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
             else:
                 result = epicbox.run('python', 'python3 grader.py', files=files, limits=limits,
-                                     stdin=i_o[0]+"\n"+i_o[1])
+                                     stdin=i_o[0] + "\n" + i_o[1])
             stdout = clean_stdout(result["stdout"])
             stderr = clean_stdout(result["stderr"])
             response = {
@@ -262,27 +281,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'message': 'O teu programa obteve ' + str(int(self.student_score * 100)) + "%."
             })
 
-    @XBlock.json_handler
-    def run_code(self, data, _suffix):
+    def save_output(self, output):
         """
-            Triggered when the "run code" button is pressed. Tests the program against user defined input
-        :param data:
-        :param _suffix:
+            Cache user's last submission's output
+        :param output:
         :return:
         """
-        self.student_code = data["student_code"]
-        input = data["input"]
-        files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
-
-        result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
-        stdout = clean_stdout(result["stdout"])
-        stderr = clean_stdout(result["stderr"])
-        return {
-            'result': 'success',
-            'exit_code': result["exit_code"],
-            'stdout': stdout,
-            'stderr': stderr
-        }
+        self.last_output = json.dumps(output)
 
     def get_student_item_dict(self, student_id=None):
         # pylint: disable=no-member
@@ -303,6 +308,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """Returns trailing number portion of self.location"""
         return str(self.location).split('@')[-1]
 
+    #  ----------- ScorableXBlockMixin -----------
     def has_submitted_answer(self):
         return self.student_score != -1
 
