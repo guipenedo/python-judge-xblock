@@ -127,11 +127,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         html = loader.render_django_template('templates/pyjudge_student.html', data)
         frag = Fragment(html)
 
+        if self.show_staff_grading_interface():
+            frag.add_javascript(resource_string("static/js/jquery.tablesorter.min.js"))
+
         frag.add_javascript(resource_string("static/js/pyjudge_student.js"))
         frag.initialize_js('PythonJudgeXBlock', data)
 
-        if self.show_staff_grading_interface():
-            frag.add_javascript(resource_string("static/js/jquery.tablesorter.min.js"))
         add_styling_and_editor(frag)
         return frag
 

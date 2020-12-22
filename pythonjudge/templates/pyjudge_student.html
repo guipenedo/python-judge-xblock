@@ -35,6 +35,7 @@
 
 
 {% if is_course_staff %}
+<h3>Submissões</h3>
 <table class="gridtable tablesorter" id="submissions_{{xblock_id}}">
     <thead>
     <tr>
@@ -47,7 +48,7 @@
     </thead>
     <tbody>
     {% for assignment in submissions %}
-    <tr data-student_code="{{assignment.code}}" data-evaluation="{{assignment.evaluation}}">
+    <tr data-student_code="{{assignment.code}}" data-evaluation="{{assignment.evaluation}}" data-fullname="{{assignment.fullname}}">
         <td>{{assignment.username}}</td>
         <td>{{assignment.fullname}}</td>
         <td>{{assignment.timestamp}}</td>

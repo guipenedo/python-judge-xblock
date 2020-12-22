@@ -83,11 +83,13 @@ function PythonJudgeXBlock(runtime, element, context) {
         $(element).find('#view_code_button_' + id)
             .leanModal()
             .on('click', function () {
-                var row = $(this).parents("tr");
+                let row = $(this).parents("tr");
                 $(element).find('#view_code_student_name_' + id).text(row.data('fullname'));
                 view_submission_editor.setValue(row.data('student_code'));
                 outputResponse(row.data('evaluation'), "#view_code_feedback")
             });
+
+        $("#submissions_" + id).tablesorter();
     }
 
 

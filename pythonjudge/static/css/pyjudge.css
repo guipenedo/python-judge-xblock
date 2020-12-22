@@ -61,3 +61,56 @@
     border-radius: 5px;
     background: #f9f9f9;
 }
+
+
+table.gridtable {
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+
+table.gridtable th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+
+table.gridtable td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+}
+
+table.tablesorter thead tr .header {
+    cursor: pointer;
+}
+
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #8dbdd8;
+}
+
+.student-code-modal {
+    position: fixed;
+    z-index: 100;
+    display: none;
+    width: 80%;
+    height: 75%;
+    overflow: hidden;
+
+    left: 10% !important; /* important is necessary to override modal JS styling */
+    margin-left: 0px !important; /* important is necessary to override modal JS styling */
+}
+
+.student-code-modal .inner-wrapper {
+    height: 100%;
+    overflow-y: scroll;
+    box-sizing: border-box;
+}
+
