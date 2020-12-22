@@ -320,7 +320,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'timestamp': submission['submitted_at'] or submission['created_at'],
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
-                'score': submissions_api.get_score(submission['student_item'])['points_earned']
+                'score': submissions_api.get_score(self.get_student_item_dict(student.student_id))['points_earned']
             })
 
         assignments.sort(
