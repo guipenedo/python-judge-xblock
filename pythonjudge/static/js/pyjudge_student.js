@@ -82,7 +82,7 @@ function PythonJudgeXBlock(runtime, element, context) {
             readOnly: true
         });
 
-        $(element).find('#view_code_button_' + id)
+        $(element).find('.view_code_button_' + id)
             .leanModal()
             .on('click', function () {
                 let row = $(this).parents("tr");
