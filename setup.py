@@ -38,5 +38,5 @@ setup(
             'pythonjudge = pythonjudge:PythonJudgeXBlock',
         ]
     },
-    package_data=package_data("pythonjudge", ["static"]),
+    package_data=package_data("pythonjudge", ["static", "templates"]),
 )
