@@ -35,40 +35,32 @@
 
 
 {% if is_course_staff %}
-<script type="text/html">
-    <table class="gridtable tablesorter" id="submissions_{{xblock_id}}">
-        <thead>
-        <tr>
-            <th class="header">Username <i class="icon fa fa-sort"/></th>
-            <th class="header">Nome <i class="icon fa fa-sort"/></th>
-            <th class="header">Timestamp <i class="icon fa fa-sort"/></th>
-            <th class="header">Score <i class="icon fa fa-sort"/></th>
-            <th class="header" colspan="2">Código</th>
-        </tr>
-        </thead>
-        <tbody>
-        <% for (var i = 0; i < submissions.length; i++) { %>
-        <% var assignment = submissions[i]; %>
-        <tr data-student_code="<%= assignment.code %>" data-evaluation="<%= assignment.evaluation %>">
-            <td><%= assignment.username %></td>
-            <td><%= assignment.fullname %></td>
-            <td><%= assignment.timestamp %></td>
-            <td>
-                <% if (assignment.score !== null) { %>
-                <%= assignment.score %> /
-                <%= 100 %>
-                <% } %>
-            </td>
-            <td>
-                <a class="button" id="view_code_button_{{ xblock_id }}" href="#view_code_{{ xblock_id }}">
-                    Ver Submissão
-                </a>
-            </td>
-        </tr>
-        <% } %>
-        </tbody>
-    </table>
-</script>
+<table class="gridtable tablesorter" id="submissions_{{xblock_id}}">
+    <thead>
+    <tr>
+        <th class="header">Username <i class="icon fa fa-sort"/></th>
+        <th class="header">Nome <i class="icon fa fa-sort"/></th>
+        <th class="header">Timestamp <i class="icon fa fa-sort"/></th>
+        <th class="header">Score <i class="icon fa fa-sort"/></th>
+        <th class="header" colspan="2">Código</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for assignment in submissions %}
+    <tr data-student_code="{{assignment.code}}" data-evaluation="{{assignment.evaluation}}">
+        <td>{{assignment.username}}</td>
+        <td>{{assignment.fullname}}</td>
+        <td>{{assignment.timestamp}}</td>
+        <td>{{assignment.score}}/100</td>
+        <td>
+            <a class="button" id="view_code_button_{{ xblock_id }}" href="#view_code_{{ xblock_id }}">
+                Ver Submissão
+            </a>
+        </td>
+    </tr>
+    <% } %>
+    </tbody>
+</table>
 <section aria-hidden="true" class="modal student-code-modal" id="view_code_{{ xblock_id }}" tabindex="-1">
     <div class="inner-wrapper" style="color: black">
         <header><h2>
