@@ -205,7 +205,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             'code': self.student_code,
             'evaluation': self.last_output
         }, attempt_number=1)
-        submissions_api.set_score(submission["uuid"], int(self.student_score*100), 100)
+        submissions_api.set_score(str(submission["uuid"]), int(self.student_score*100), 100)
         # send back the evaluation as json object
         return json.loads(self.last_output)
 
