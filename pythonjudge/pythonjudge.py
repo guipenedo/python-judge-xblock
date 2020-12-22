@@ -306,7 +306,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """returns student recent assignments sorted on date"""
         assignments = []
         submissions = submissions_api.get_all_submissions(
-            self.course_id,
+            str(self.course_id),
             self._get_xblock_loc(),
             ITEM_TYPE
         )
@@ -338,7 +338,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             student_id = self.xmodule_runtime.anonymous_student_id
         return {
             "student_id": student_id,
-            "course_id": self.course_id,
+            "course_id": str(self.course_id),
             "item_id": self._get_xblock_loc(),
             "item_type": ITEM_TYPE,
         }
