@@ -12,15 +12,15 @@ function PythonJudgeXBlock(runtime, element, context) {
         fontSize: "14pt"
     });
 
-    function outputResponse(response) {
+    function outputResponse(response, feedbackElement= "#code-feedback") {
         switchButtons(false);
         if (response.result === 'success') {
-            $("#code-feedback_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
+            $(feedbackElement + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
         } else {
             if (response.exit_code === 0 && !response.stderr)
-                $("#code-feedback_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
+                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
             else
-                $("#code-feedback_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
+                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
         }
     }
 
@@ -66,6 +66,30 @@ function PythonJudgeXBlock(runtime, element, context) {
             $("#code-runner-output_" + id).text("Erro desconhecido. Por favor tenta novamente mais tarde.");
         });
     });
+
+    if(context.is_course_staff) {
+        let view_submission_editor = ace.edit("view_student_code_" + id);
+        view_submission_editor.setOptions({
+            maxLines: 50,
+            minLines: 10,
+            autoScrollEditorIntoView: true,
+            theme: "ace/theme/monokai",
+            showPrintMargin: false,
+            mode: "ace/mode/python",
+            fontSize: "14pt",
+            readOnly: true
+        });
+
+        $(element).find('#view_code_button_' + id)
+            .leanModal()
+            .on('click', function () {
+                var row = $(this).parents("tr");
+                $(element).find('#view_code_student_name_' + id).text(row.data('fullname'));
+                view_submission_editor.setValue(row.data('student_code'));
+                outputResponse(row.data('evaluation'), "#view_code_feedback")
+            });
+    }
+
 
     //autosave every 10 seconds
     let previous_code = editor.getValue();

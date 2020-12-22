@@ -1,0 +1,84 @@
+<div class="student_code" id="student_code_{{xblock_id}}">{{student_code}}</div>
+<div class="code-runner" id="code-runner_{{xblock_id}}" style="display:none;">
+    <label for="code-runner-input_{{xblock_id}}">Input de teste</label>
+    <div class="code-runner-block">
+        <textarea autocapitalize="off" class="input code-runner-input" id="code-runner-input_{{xblock_id}}"
+                  spellcheck="false"></textarea>
+        <button class="submit btn-brand code-runner-button" data-should-enable-submit-button="True"
+                data-submitting="Correndo"
+                data-value="Correr código" id="code-runner-button_{{xblock_id}}"
+                type="button">
+            <span class="submit-label">Correr código</span>
+            <span aria-hidden="true" class="icon fa fa-terminal"></span>
+        </button>
+    </div>
+    <div class="code-runner-footer">
+        <label for="code-runner-output_{{xblock_id}}">Output de teste</label>
+        <pre class="code-runner-output" id="code-runner-output_{{xblock_id}}"></pre>
+    </div>
+</div>
+<div class="action">
+    <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo"
+            data-value="Correr código" id="run_{{xblock_id}}"
+            type="button">
+        <span class="submit-label">Correr código</span>
+        <span aria-hidden="true" class="icon fa fa-terminal"></span>
+    </button>
+    <button class="submit btn-upgrade" data-should-enable-submit-button="True" data-submitting="A submeter"
+            data-value="Submeter" id="submit_{{xblock_id}}"
+            type="button">
+        <span class="submit-label">Submeter</span>
+        <span aria-hidden="true" class="icon fa fa-caret-right"></span>
+    </button>
+</div>
+<div class="code-feedback" id="code-feedback_{{xblock_id}}">Nenhuma submissão avaliada.</div>
+
+
+{% if is_course_staff %}
+<script type="text/template">
+    <table class="gridtable tablesorter" id="submissions_{{xblock_id}}">
+        <thead>
+        <tr>
+            <th class="header">Username <i class="icon fa fa-sort"/></th>
+            <th class="header">Nome <i class="icon fa fa-sort"/></th>
+            <th class="header">Timestamp <i class="icon fa fa-sort"/></th>
+            <th class="header">Score <i class="icon fa fa-sort"/></th>
+            <th class="header" colspan="2">Código</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% for (var i = 0; i < submissions.length; i++) { %>
+        <% var assignment = submissions[i]; %>
+        <tr data-student_code="<%= assignment.code %>" data-evaluation="<%= assignment.evaluation %>">
+            <td><%= assignment.username %></td>
+            <td><%= assignment.fullname %></td>
+            <td><%= assignment.timestamp %></td>
+            <td>
+                <% if (assignment.score !== null) { %>
+                <%= assignment.score %> /
+                <%= 100 %>
+                <% } %>
+            </td>
+            <td>
+                <a class="button" id="view_code_button_{{ xblock_id }}" href="#view_code_{{ xblock_id }}">
+                    Ver Submissão
+                </a>
+            </td>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+</script>
+<section aria-hidden="true" class="modal student-code-modal" id="view_code_{{ xblock_id }}" tabindex="-1">
+    <div class="inner-wrapper" style="color: black">
+        <header><h2>
+            Aluno: <span id="view_code_student_name_{{ xblock_id }}"></span>
+        </h2></header>
+        <br/>
+        <div style="display: block;">
+            <div class="student_code" id="view_student_code_{{xblock_id}}"></div>
+            <div class="code-feedback" id="view_code_feedback_{{xblock_id}}">Nenhuma submissão avaliada.</div>
+        </div>
+    </div>
+</section>
+{% endif %}

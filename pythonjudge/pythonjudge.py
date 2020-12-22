@@ -9,6 +9,8 @@ from web_fragments.fragment import Fragment
 import json
 import epicbox
 from xblockutils.resources import ResourceLoader
+from submissions import api as submissions_api
+from common.djangoapps.student.models import user_by_anonymous_id
 
 loader = ResourceLoader(__name__)
 
@@ -109,29 +111,32 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         if not self.student_code:
             self.student_code = self.initial_code
-
-        html = loader.render_django_template('static/html/pyjudge_student.html', {
+        data = {
             'student_code': self.student_code,
             'xblock_id': self._get_xblock_loc()
-        })
-        frag = Fragment(html)
-
-        frag.add_javascript(resource_string("static/js/pyjudge_student.js"))
-
-        data = {'xblock_id': self._get_xblock_loc()}
+        }
         if self.last_output:
             try:
                 data["last_output"] = json.loads(self.last_output)
             except ValueError:
                 pass
+        if self.show_staff_grading_interface():
+            data['is_course_staff'] = True
+            data['submissions'] = self.get_sorted_submissions()
 
+        html = loader.render_django_template('templates/pyjudge_student.html', data)
+        frag = Fragment(html)
+
+        frag.add_javascript(resource_string("static/js/pyjudge_student.js"))
         frag.initialize_js('PythonJudgeXBlock', data)
 
+        if self.show_staff_grading_interface():
+            frag.add_javascript(resource_string("static/js/jquery.tablesorter.min.js"))
         add_styling_and_editor(frag)
         return frag
 
     def author_view(self, _context):
-        html = loader.render_django_template('static/html/pyjudge_author.html', {
+        html = loader.render_django_template('templates/pyjudge_author.html', {
             'initial_code': self.initial_code,
             'grader_code': self.grader_code,
             'uses_grader': self.grade_mode != 'input/output',
@@ -194,6 +199,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.student_score = 0
         # rescore even if the score lowers
         self.rescore(False)
+        # store using submissions_api
+        submission = submissions_api.create_submission(self.get_student_item_dict(), {
+            'code': self.student_code,
+            'evaluation': self.last_output
+        }, attempt_number=1)
+        submissions_api.set_score(submission["uuid"], int(self.student_score*100), 100)
+        # send back the evaluation as json object
         return json.loads(self.last_output)
 
     @XBlock.json_handler
@@ -289,6 +301,33 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         self.last_output = json.dumps(output)
 
+    # ----------- Submissions -----------
+    def get_sorted_submissions(self):
+        """returns student recent assignments sorted on date"""
+        assignments = []
+        submissions = submissions_api.get_all_submissions(
+            self.course_id,
+            self.block_id,
+            ITEM_TYPE
+        )
+
+        for submission in submissions:
+            student = user_by_anonymous_id(submission['student_id'])
+            assignments.append({
+                'submission_id': submission['uuid'],
+                'username': student['username'],
+                'fullname': student['profile']['name'],
+                'timestamp': submission['submitted_at'] or submission['created_at'],
+                'code': submission['answer']['code'],
+                'evaluation': submission['answer']['evaluation'],
+                'score': submissions_api.get_score(submission['student_item'])['points_earned']
+            })
+
+        assignments.sort(
+            key=lambda assignment: assignment['timestamp'], reverse=True
+        )
+        return assignments
+
     def get_student_item_dict(self, student_id=None):
         # pylint: disable=no-member
         """
@@ -307,6 +346,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     def _get_xblock_loc(self):
         """Returns trailing number portion of self.location"""
         return str(self.location).split('@')[-1]
+
+    def show_staff_grading_interface(self):
+        """
+        Return if current user is staff and not in studio.
+        """
+        in_studio_preview = self.scope_ids.user_id is None
+        return getattr(self.xmodule_runtime, 'user_is_staff', False) and not in_studio_preview
 
     #  ----------- ScorableXBlockMixin -----------
     def has_submitted_answer(self):
