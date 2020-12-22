@@ -315,8 +315,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             student = user_by_anonymous_id(submission['student_id'])
             assignments.append({
                 'submission_id': submission['uuid'],
-                'username': student['username'],
-                'fullname': student['profile']['name'],
+                'username': student.username,
+                'fullname': student.profile.name,
                 'timestamp': submission['submitted_at'] or submission['created_at'],
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
