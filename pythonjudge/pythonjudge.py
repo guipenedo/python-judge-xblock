@@ -202,11 +202,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         # rescore even if the score lowers
         self.rescore(False)
         # store using submissions_api
-        submission = submissions_api.create_submission(self.get_student_item_dict(), {
+        submissions_api.create_submission(self.get_student_item_dict(), {
             'code': self.student_code,
-            'evaluation': self.last_output
+            'evaluation': self.last_output,
+            'score': int(self.student_score * 100)
         }, attempt_number=1)
-        submissions_api.set_score(str(submission["uuid"]), int(self.student_score*100), 100)
         # send back the evaluation as json object
         return json.loads(self.last_output)
 
@@ -322,7 +322,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'timestamp': submission['submitted_at'] or submission['created_at'],
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
-                'score': submissions_api.get_score(self.get_student_item_dict(submission['student_id']))['points_earned']
+                'score': submission['answer']['score']
             })
 
         assignments.sort(
