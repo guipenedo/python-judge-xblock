@@ -89,7 +89,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                               help="(Sem efeito para grading input/output). Se verdadeiro, usa como score a média dos scores para cada caso de teste. Se Falso, usa 0 se um caso for != 1 e 1 caso contrário.", )
 
     test_cases = String(display_name="test_cases",
-                        default='[["Manuel", "Como te chamas?\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\nOlá, Menino Joãozinho"]]',
+                        default='[["Manuel", "Como te chamas?\\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\\nOlá, Menino Joãozinho"]]',
                         scope=Scope.content,
                         multiline_editor=True,
                         help="Uma lista de listas, estando cada uma das sublistas no formato: [input, output]. Para avaliação com grader, se a input não for lida daqui, então ter apenas um caso de teste vazio [\"\", \"\"].")
