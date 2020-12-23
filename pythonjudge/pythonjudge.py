@@ -322,7 +322,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'timestamp': submission['submitted_at'] or submission['created_at'],
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
-                'score': submission['answer']['score']
+                'score': submission['answer']['score'] if 'score' in submission['answer'] else 0
             })
 
         assignments.sort(
