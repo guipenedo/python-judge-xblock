@@ -168,7 +168,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :return:
         """
         self.initial_code = data["initial_code"]
-        self.grader_code = data["grader_code"]
+        if "grader_code" in data:
+            self.grader_code = data["grader_code"]
         return {
             'result': 'success'
         }
