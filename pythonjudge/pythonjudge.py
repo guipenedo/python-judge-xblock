@@ -102,6 +102,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     icon_class = 'problem'
     block_type = 'problem'
     has_author_view = True
+    has_score = True
 
     # ----------- Views -----------
     def student_view(self, _context):
