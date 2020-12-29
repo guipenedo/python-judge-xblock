@@ -64,6 +64,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                          help="O código do grader")
 
     model_answer = String(display_name="model_answer",
+                          default="",
                           scope=Scope.settings,
                           help="Resposta modelo para este problema")
 
