@@ -24,12 +24,12 @@ function PythonJudgeXBlock(runtime, element, context) {
             while (j < output.length && output[j] === '\n')
                 j++;
             if (i >= expected_out.length || expected_out[i++] !== output[j])
-                return output.substr(0, j) + '<span style="color:red;font-weight: bold">' + output[j] + '</span>[...]' + output.substr(j+1, output.length-j-1);
+                return output.substr(0, j) + '<span style="color:red;font-weight: bold">' + output[j] + '</span>' + output.substr(j+1, output.length-j-1);
             j++;
         }
         let formatted_output = output;
         if (i < expected_out.length)
-            formatted_output += '<span style="color:red;font-weight: bold">' + expected_out.substr(i, expected_out.length-i) + '</span>';
+            formatted_output += '[<span style="color:red;font-weight: bold">' + expected_out.substr(i, expected_out.length-i) + '</span>]';
         return formatted_output
     }
 
