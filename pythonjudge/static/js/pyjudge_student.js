@@ -12,15 +12,36 @@ function PythonJudgeXBlock(runtime, element, context) {
         fontSize: "14pt"
     });
 
+    function replaceNewLines(str){
+        return str.replace(/(?:\r\n|\r|\n)/g, '<br>');
+    }
+
+    function formatOutputDiff(expected_out, output){
+        let i = 0, j = 0;
+        while (j < output.length){
+            while (i < expected_out.length && expected_out[i] === '\n')
+                i++;
+            while (j < output.length && output[j] === '\n')
+                j++;
+            if (i >= expected_out.length || expected_out[i++] !== output[j])
+                return output.substr(0, j) + '<span style="color:red;font-weight: bold">' + output[j] + '</span>[...]' + output.substr(j+1, output.length-j-1);
+            j++;
+        }
+        let formatted_output = output;
+        if (i < expected_out.length)
+            formatted_output += '<span style="color:red;font-weight: bold">[' + expected_out.substr(i, expected_out.length-i) + ']</span>';
+        return formatted_output
+    }
+
     function outputResponse(response, feedbackElement= "#code-feedback") {
         switchButtons(false);
         if (response.result === 'success') {
             $(feedbackElement + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
         } else {
             if (response.exit_code === 0 && !response.stderr)
-                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + response.student_output)
+                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + replaceNewLines(formatOutputDiff(response.expected_output, response.student_output)))
             else
-                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + response.expected_output + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + response.stderr)
+                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + replaceNewLines(response.stderr))
         }
     }
 
@@ -59,9 +80,9 @@ function PythonJudgeXBlock(runtime, element, context) {
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             switchButtons(false);
             if (response.exit_code === 0 && !response.stderr)
-                $("#code-runner-output_" + id).html(response.stdout);
+                $("#code-runner-output_" + id).html(replaceNewLines(response.stdout));
             else
-                $("#code-runner-output_" + id).html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + (response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + response.stderr);
+                $("#code-runner-output_" + id).html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + replaceNewLines(response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + replaceNewLines(response.stderr));
 
         }).fail(function () {
             switchButtons(false);

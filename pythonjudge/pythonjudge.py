@@ -31,7 +31,7 @@ def clean_stdout(std):
         std = std.decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
         pass
-    return str(std).strip(" \n").replace('\n', '<br/>').replace('\r', '<br/>')
+    return str(std).strip(" \n").replace('\r', '\n')
 
 
 def resource_string(path):
@@ -268,12 +268,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             partial_grade = 0.0
             if not simple_grading:
                 try:
-                    partial_grade = float(stdout.replace("<br/>", ""))
+                    partial_grade = float(stdout.replace("\n", ""))
                 except ValueError:
                     pass
             grade_sum += partial_grade
             if result["exit_code"] != 0 \
-                    or (simple_grading and stdout.replace("<br/>", "") != expected_output.replace("<br/>", "")) \
+                    or (simple_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")) \
                     or (not simple_grading and not self.partial_grading and partial_grade != 1.0):
                 self.save_output(response)
                 # completion interface
