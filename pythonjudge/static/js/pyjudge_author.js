@@ -63,13 +63,13 @@ function PythonJudgeXBlock(runtime, element, context) {
 
     // submit
     $(element).find('#test_model_answer_' + id).bind('click', function () {
-        $(this).disable();
+        $(this).prop("disabled", true);
         const data = {
             'model_answer': editor_model_answer.getValue()
         };
         const handlerUrl = runtime.handlerUrl(element, 'test_model_solution');
         $.post(handlerUrl, JSON.stringify(data)).done((response) => {
-            $(this).enable();
+            $(this).prop("disabled", false);
             if (response.result === 'success') {
                 $("#code-feedback" + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
             } else {
