@@ -19,13 +19,21 @@
                 <div id="model_answer_{{xblock_id}}">{{model_answer}}</div>
             </div>
             <span class="tip setting-help">Solução modelo para este problema</span>
+            <div class="code-feedback" id="code-feedback_{{xblock_id}}"></div>
         </li>
     </ul>
     <div class="xblock-actions">
         <ul>
-            <li class="action-item"><button id="save-button_{{xblock_id}}" class="submit btn-brand" type="button">
-                <span class="submit-label">Save</span>
-            </button></li>
+            <li class="action-item">
+                <button id="save-button_{{xblock_id}}" class="submit btn-brand" type="button">
+                    <span class="submit-label">Save</span>
+                </button>
+            </li>
+            <li class="action-item">
+                <button id="test_model_answer_{{xblock_id}}" class="submit btn-brand" type="button">
+                    <span class="submit-label">Testar solução modelo</span>
+                </button>
+            </li>
         </ul>
     </div>
 </div>

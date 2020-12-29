@@ -221,6 +221,29 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         return json.loads(self.last_output)
 
     @XBlock.json_handler
+    def test_model_solution(self, data, _suffix):
+        student_code = self.student_code
+        student_score = self.student_score
+        last_output = self.last_output
+
+        if "model_answer" not in data or not data["model_answer"]:
+            return {
+                'result': 'error',
+                'message': 'Empty model_answer.'
+            }
+
+        self.model_answer = data["model_answer"]
+        self.student_code = self.model_answer
+        self.evaluate_submission(True)
+        response = self.last_output
+
+        self.last_output = last_output
+        self.student_code = student_code
+        self.student_score = student_score
+
+        return json.loads(response)
+
+    @XBlock.json_handler
     def get_model_answer(self, _data, _suffix):
         """
             Triggered when the user presses the view answer button.
@@ -263,7 +286,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         }
 
     #  ----------- Evaluation -----------
-    def evaluate_submission(self):
+    def evaluate_submission(self, test=False):
         """
             Evaluate this student's latest submission with our test cases
         :return:
@@ -305,7 +328,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                     or (not simple_grading and not self.partial_grading and partial_grade != 1.0):
                 self.save_output(response)
                 # completion interface
-                self.emit_completion(0.0)
+                if not test:
+                    self.emit_completion(0.0)
                 return
             ti += 1
         if simple_grading:
@@ -313,7 +337,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         else:
             self.student_score = grade_sum / (ti - 1)
         # completion interface
-        self.emit_completion(self.student_score)
+        if not test:
+            self.emit_completion(self.student_score)
         if simple_grading or not self.partial_grading:
             self.save_output({
                 'result': 'success',
