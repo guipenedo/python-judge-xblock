@@ -232,8 +232,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'message': 'Empty model_answer.'
             }
 
-        self.model_answer = data["model_answer"]
-        self.student_code = self.model_answer
+        self.student_code = data["model_answer"]
         self.evaluate_submission(True)
         response = self.last_output
 

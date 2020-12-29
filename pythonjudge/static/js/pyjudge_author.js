@@ -67,7 +67,7 @@ function PythonJudgeXBlock(runtime, element, context) {
         const data = {
             'model_answer': editor_model_answer.getValue()
         };
-        const handlerUrl = runtime.handlerUrl(element, 'test_model_solution').replace("/preview", "");
+        const handlerUrl = runtime.handlerUrl(element, 'test_model_solution');
         $.post(handlerUrl, JSON.stringify(data)).done((response) => {
             $(this).prop("disabled", false);
             if (response.result === 'success') {
