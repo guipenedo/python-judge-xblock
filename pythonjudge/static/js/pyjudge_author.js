@@ -12,6 +12,8 @@ function PythonJudgeXBlock(runtime, element, context) {
     };
     let editor_initial = ace.edit("initial_code_" + id);
     editor_initial.setOptions(options);
+    let editor_model_answer = ace.edit("model_answer_" + id);
+    editor_model_answer.setOptions(options);
     if (context.uses_grader) {
         let editor_grader = ace.edit("grader_code_" + id);
         editor_grader.setOptions(options);
@@ -19,7 +21,8 @@ function PythonJudgeXBlock(runtime, element, context) {
 
     $(element).find('#save-button_' + id).bind('click', function() {
         let data = {
-            'initial_code': editor_initial.getValue()
+            'initial_code': editor_initial.getValue(),
+            'model_answer': editor_model_answer.getValue()
         };
         if (context.uses_grader)
             data['grader_code'] = editor_grader.getValue()

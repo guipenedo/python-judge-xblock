@@ -63,6 +63,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                          scope=Scope.settings,
                          help="O código do grader")
 
+    model_answer = String(display_name="model_answer",
+                          default=None,
+                          scope=Scope.settings,
+                          help="Resposta modelo para este problema")
+
     student_code = String(display_name="student_code",
                           default="",
                           scope=Scope.user_state,
@@ -141,6 +146,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     def author_view(self, _context):
         html = loader.render_django_template('templates/pyjudge_author.html', {
             'initial_code': self.initial_code,
+            'model_answer': self.model_answer,
             'grader_code': self.grader_code,
             'uses_grader': self.grade_mode != 'input/output',
             'xblock_id': self._get_xblock_loc()
@@ -169,6 +175,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :return:
         """
         self.initial_code = data["initial_code"]
+        if "model_answer" in data and data["model_answer"]:
+            self.model_answer = data["model_answer"]
         if "grader_code" in data:
             self.grader_code = data["grader_code"]
         return {
@@ -211,6 +219,26 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         }, attempt_number=1)
         # send back the evaluation as json object
         return json.loads(self.last_output)
+
+    @XBlock.json_handler
+    def get_model_answer(self, data, _suffix):
+        """
+            Triggered when the user presses the view answer button.
+            We check if they have completed the problem and if so send the model answer
+        :param data:
+        :param _suffix:
+        :return:
+        """
+
+        if self.student_score < 1.0:
+            return {
+                'result': 'error',
+                'message': 'Ainda não completaste este problema!'
+            }
+        return {
+            'result': 'success',
+            'model_answer': self.model_answer
+        }
 
     @XBlock.json_handler
     def run_code(self, data, _suffix):

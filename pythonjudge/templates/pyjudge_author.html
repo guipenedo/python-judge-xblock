@@ -14,6 +14,12 @@
                 <span class="tip setting-help">O grader para este problema (grader.py). Deverá chamar uma função do código do aluno (que está no ficheiro main.py) e imprimir para o stdout o resultado [0, 1]. Ignorado se este problema estiver configurado para grading input/output.</span>
             </li>
         {% endif %}
+        <li class="field comp-setting-entry is-set">
+            <div class="wrapper-comp-setting"><label class="label setting-label" for="model_answer_{{xblock_id}}">Model answer</label>
+                <div id="model_answer_{{xblock_id}}">{{model_answer}}</div>
+            </div>
+            <span class="tip setting-help">Solução modelo para este problema</span>
+        </li>
     </ul>
     <div class="xblock-actions">
         <ul>

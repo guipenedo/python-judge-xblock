@@ -18,21 +18,29 @@
     </div>
 </div>
 <div class="action">
-    <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo"
-            data-value="Correr código" id="run_{{xblock_id}}"
-            type="button">
-        <span class="submit-label">Correr código</span>
-        <span aria-hidden="true" class="icon fa fa-terminal"></span>
-    </button>
-    <button class="submit btn-upgrade" data-should-enable-submit-button="True" data-submitting="A submeter"
-            data-value="Submeter" id="submit_{{xblock_id}}"
-            type="button">
-        <span class="submit-label">Submeter</span>
-        <span aria-hidden="true" class="icon fa fa-caret-right"></span>
-    </button>
+    <div class="action-buttons">
+        <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo"
+                data-value="Correr código" id="run_{{xblock_id}}"
+                type="button">
+            <span class="submit-label">Correr código</span>
+            <span aria-hidden="true" class="icon fa fa-terminal"></span>
+        </button>
+        <button class="submit btn-upgrade" data-should-enable-submit-button="True" data-submitting="A submeter"
+                data-value="Submeter" id="submit_{{xblock_id}}"
+                type="button">
+            <span class="submit-label">Submeter</span>
+            <span aria-hidden="true" class="icon fa fa-caret-right"></span>
+        </button>
+    </div>
+    <div class="problem-action-buttons-wrapper" id="model_answer_container_{{xblock_id}}" style="display: none;">
+        <span class="problem-action-button-wrapper">
+            <a class="btn-default btn-small" id="model_answer_button_{{ xblock_id }}" href="#model_answer_modal_{{ xblock_id }}">
+                Ver solução modelo
+            </a>
+        </span>
+    </div>
 </div>
 <div class="code-feedback" id="code-feedback_{{xblock_id}}">Nenhuma submissão avaliada.</div>
-
 
 {% if is_course_staff %}
 <h3>Submissões</h3>
@@ -75,3 +83,15 @@
     </div>
 </section>
 {% endif %}
+
+<section aria-hidden="true" class="modal student-code-modal" id="model_answer_modal_{{ xblock_id }}" tabindex="-1">
+    <div class="inner-wrapper" style="color: black">
+        <header><h2>
+            Solução modelo<small> esta solução é apenas uma sugestão, a tua também está correta.</small>
+        </h2></header>
+        <br/>
+        <div style="display: block;">
+            <div id="view_model_answer_{{xblock_id}}"></div>
+        </div>
+    </div>
+</section>

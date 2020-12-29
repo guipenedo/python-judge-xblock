@@ -12,10 +12,22 @@ function PythonJudgeXBlock(runtime, element, context) {
         fontSize: "14pt"
     });
 
+    let disabledEditorOptions = {
+        maxLines: 50,
+        minLines: 10,
+        autoScrollEditorIntoView: true,
+        theme: "ace/theme/monokai",
+        showPrintMargin: false,
+        mode: "ace/mode/python",
+        fontSize: "14pt",
+        readOnly: true
+    };
+
     function replaceNewLines(str){
         return str.replace(/(?:\r\n|\r|\n)/g, '<br>');
     }
 
+    // helper to visually format difference between outputs
     function formatOutputDiff(expected_out, output){
         let i = 0, j = 0;
         while (j < output.length){
@@ -33,10 +45,13 @@ function PythonJudgeXBlock(runtime, element, context) {
         return formatted_output
     }
 
+    // parse json response from backend
     function outputResponse(response, feedbackElement= "#code-feedback") {
         switchButtons(false);
         if (response.result === 'success') {
             $(feedbackElement + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
+            if (feedbackElement === "#code-feedback")
+                $("#model_answer_container_" + id).show();
         } else {
             if (response.exit_code === 0 && !response.stderr)
                 $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Output do teu programa:</b> (primeira diferença a vermelho)<br/>" + replaceNewLines(formatOutputDiff(response.expected_output, response.student_output)))
@@ -45,12 +60,14 @@ function PythonJudgeXBlock(runtime, element, context) {
         }
     }
 
+    // helper to disable and enable buttons
     function switchButtons(disabled){
         $(element).find('#submit_' + id).prop("disabled", disabled);
         $(element).find('#run_' + id).prop("disabled", disabled);
         $(element).find('#code-runner-button_' + id).prop("disabled", disabled);
     }
 
+    // submit
     $(element).find('#submit_' + id).bind('click', function() {
         $(element).find('#code-runner_' + id).hide();
         $(element).find('#run_' + id).show();
@@ -64,11 +81,12 @@ function PythonJudgeXBlock(runtime, element, context) {
         });
     });
 
-
+    // run button
     $(element).find('#run_' + id).bind('click', function () {
         $(this).hide();
         $(element).find('#code-runner_' + id).show();
     });
+
 
     $(element).find('#code-runner-button_' + id).bind('click', function () {
         const data = {
@@ -90,18 +108,24 @@ function PythonJudgeXBlock(runtime, element, context) {
         });
     });
 
+    // view answer button
+    let view_model_answer_editor = ace.edit("view_model_answer_" + id);
+    view_model_answer_editor.setOptions(disabledEditorOptions);
+    $(element).find('#model_answer_button_' + id)
+        .leanModal()
+        .on('click', function () {
+            const handlerUrl = runtime.handlerUrl(element, 'get_model_answer');
+            $.post(handlerUrl, "{}").done(function (response) {
+                if (response.result === 'success')
+                    view_model_answer_editor.setValue(response.model_answer);
+                else
+                    view_model_answer_editor.setValue(response.message);
+            });
+        });
+
     if(context.is_course_staff) {
         let view_submission_editor = ace.edit("view_student_code_" + id);
-        view_submission_editor.setOptions({
-            maxLines: 50,
-            minLines: 10,
-            autoScrollEditorIntoView: true,
-            theme: "ace/theme/monokai",
-            showPrintMargin: false,
-            mode: "ace/mode/python",
-            fontSize: "14pt",
-            readOnly: true
-        });
+        view_submission_editor.setOptions(disabledEditorOptions);
 
         $(element).find('.view_code_button_' + id)
             .leanModal()
