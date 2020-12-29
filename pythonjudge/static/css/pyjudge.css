@@ -105,7 +105,6 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
     z-index: 100;
     display: none;
     width: 80%;
-    height: 75%;
     overflow: hidden;
 
     left: 10% !important; /* important is necessary to override modal JS styling */
