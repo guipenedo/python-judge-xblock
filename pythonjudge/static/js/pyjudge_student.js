@@ -124,6 +124,8 @@ function PythonJudgeXBlock(runtime, element, context) {
         });
 
     if(context.is_course_staff) {
+        $("#model_answer_container_" + id).show();
+
         let view_submission_editor = ace.edit("view_student_code_" + id);
         view_submission_editor.setOptions(disabledEditorOptions);
 
