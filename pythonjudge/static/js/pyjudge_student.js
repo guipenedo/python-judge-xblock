@@ -29,7 +29,7 @@ function PythonJudgeXBlock(runtime, element, context) {
         }
         let formatted_output = output;
         if (i < expected_out.length)
-            formatted_output += '<span style="color:red;font-weight: bold">[' + expected_out.substr(i, expected_out.length-i) + ']</span>';
+            formatted_output += '<span style="color:red;font-weight: bold">' + expected_out.substr(i, expected_out.length-i) + '</span>';
         return formatted_output
     }
 
@@ -39,7 +39,7 @@ function PythonJudgeXBlock(runtime, element, context) {
             $(feedbackElement + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
         } else {
             if (response.exit_code === 0 && !response.stderr)
-                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Output do teu programa:</b> " + replaceNewLines(formatOutputDiff(response.expected_output, response.student_output)))
+                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Output do teu programa:</b> (primeira diferença a vermelho)<br/>" + replaceNewLines(formatOutputDiff(response.expected_output, response.student_output)))
             else
                 $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + replaceNewLines(response.stderr))
         }
