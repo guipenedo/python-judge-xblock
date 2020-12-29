@@ -221,6 +221,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
     @XBlock.json_handler
     def test_model_solution(self, data, _suffix):
+        # cache current values
         student_code = self.student_code
         student_score = self.student_score
         last_output = self.last_output
@@ -236,6 +237,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.evaluate_submission(True)
         response = self.last_output
 
+        # revert
         self.last_output = last_output
         self.student_code = student_code
         self.student_score = student_score
