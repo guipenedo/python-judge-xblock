@@ -221,7 +221,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         return json.loads(self.last_output)
 
     @XBlock.json_handler
-    def get_model_answer(self, data, _suffix):
+    def get_model_answer(self, _data, _suffix):
         """
             Triggered when the user presses the view answer button.
             We check if they have completed the problem and if so send the model answer
@@ -230,7 +230,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :return:
         """
 
-        if self.student_score < 1.0:
+        if self.student_score < 1.0 and not self.show_staff_grading_interface():
             return {
                 'result': 'error',
                 'message': 'Ainda não completaste este problema!'
