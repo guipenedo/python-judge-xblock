@@ -23,43 +23,6 @@ function PythonJudgeXBlock(runtime, element, context) {
         readOnly: true
     };
 
-    function replaceNewLines(str){
-        return str.replace(/(?:\r\n|\r|\n)/g, '<br>');
-    }
-
-    // helper to visually format difference between outputs
-    function formatOutputDiff(expected_out, output){
-        let i = 0, j = 0;
-        while (j < output.length){
-            while (i < expected_out.length && expected_out[i] === '\n')
-                i++;
-            while (j < output.length && output[j] === '\n')
-                j++;
-            if (i >= expected_out.length || expected_out[i++] !== output[j])
-                return output.substr(0, j) + '<span style="color:red;font-weight: bold">' + output[j] + '</span>' + output.substr(j+1, output.length-j-1);
-            j++;
-        }
-        let formatted_output = output;
-        if (i < expected_out.length)
-            formatted_output += '[<span style="color:red;font-weight: bold">' + expected_out.substr(i, expected_out.length-i) + '</span>]';
-        return formatted_output
-    }
-
-    // parse json response from backend
-    function outputResponse(response, feedbackElement= "#code-feedback") {
-        switchButtons(false);
-        if (response.result === 'success') {
-            $(feedbackElement + "_" + id).html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
-            if (feedbackElement === "#code-feedback")
-                $("#model_answer_container_" + id).show();
-        } else {
-            if (response.exit_code === 0 && !response.stderr)
-                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Output incorreta no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Output do teu programa:</b> (primeira diferença a vermelho)<br/>" + replaceNewLines(formatOutputDiff(response.expected_output, response.student_output)))
-            else
-                $(feedbackElement + "_" + id).html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + replaceNewLines(response.stderr))
-        }
-    }
-
     // helper to disable and enable buttons
     function switchButtons(disabled){
         $(element).find('#submit_' + id).prop("disabled", disabled);
@@ -77,7 +40,11 @@ function PythonJudgeXBlock(runtime, element, context) {
         switchButtons(true);
         const handlerUrl = runtime.handlerUrl(element, 'submit_code');
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
-            outputResponse(response);
+            switchButtons(false);
+            handleEditorResponse(response, $("#code-feedback_" + id), (result) => {
+                if (result === 'success')
+                    $("#model_answer_container_" + id).show();
+            })
         });
     });
 
@@ -87,7 +54,7 @@ function PythonJudgeXBlock(runtime, element, context) {
         $(element).find('#code-runner_' + id).show();
     });
 
-
+    // run button inside the runner window
     $(element).find('#code-runner-button_' + id).bind('click', function () {
         const data = {
             'student_code': editor.getValue(),
@@ -135,7 +102,7 @@ function PythonJudgeXBlock(runtime, element, context) {
                 let row = $(this).parents("tr");
                 $(element).find('#view_code_student_name_' + id).text(row.data('fullname'));
                 view_submission_editor.setValue(row.data('student_code'));
-                outputResponse(row.data('evaluation'), "#view_code_feedback")
+                handleEditorResponse(row.data('evaluation'), $("#view_code_feedback_" + id));
             });
 
         $("#submissions_" + id).tablesorter();
@@ -155,7 +122,6 @@ function PythonJudgeXBlock(runtime, element, context) {
         }
     }, 10*1000);
 
-
     if (context.last_output)
-        outputResponse(context.last_output)
+        handleEditorResponse(context.last_output, $("#code-feedback_" + id));
 }
