@@ -3,8 +3,9 @@ function PythonJudgeXBlock(runtime, element, context) {
 
     let editor_initial = getCodeEditor("initial_code_" + id);
     let editor_model_answer = getCodeEditor("model_answer_" + id);
+    let editor_grader;
     if (context.uses_grader)
-        let editor_grader = getCodeEditor("grader_code_" + id);
+        editor_grader = getCodeEditor("grader_code_" + id);
 
     // save settings
     function save_settings() {
