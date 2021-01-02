@@ -1,6 +1,7 @@
 function PythonJudgeXBlock(runtime, element, context) {
     let id = context.xblock_id;
 
+    ace.require("ace/ext/language_tools");
     let editor = ace.edit("student_code_" + id);
     editor.setOptions({
         maxLines: 50,
@@ -9,7 +10,10 @@ function PythonJudgeXBlock(runtime, element, context) {
         theme: "ace/theme/monokai",
         showPrintMargin: false,
         mode: "ace/mode/python",
-        fontSize: "14pt"
+        fontSize: "14pt",
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
     });
 
     let disabledEditorOptions = {

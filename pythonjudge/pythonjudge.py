@@ -50,6 +50,8 @@ def add_styling_and_editor(frag):
     frag.add_javascript(resource_string("static/js/ace/ace.js"))
     frag.add_javascript(resource_string("static/js/ace/mode-python.js"))
     frag.add_javascript(resource_string("static/js/ace/theme-monokai.js"))
+    frag.add_javascript(resource_string("static/js/ace/ext-language_tools.js"))
+    frag.add_javascript(resource_string("static/js/ace/snippets/python.js"))
     frag.add_javascript(resource_string("static/js/pyjudge_editor_handler.js"))
 
 
