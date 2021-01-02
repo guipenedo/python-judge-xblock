@@ -2,30 +2,7 @@ function PythonJudgeXBlock(runtime, element, context) {
     let id = context.xblock_id;
 
     ace.require("ace/ext/language_tools");
-    let editor = ace.edit("student_code_" + id);
-    editor.setOptions({
-        maxLines: 50,
-        minLines: 10,
-        autoScrollEditorIntoView: true,
-        theme: "ace/theme/monokai",
-        showPrintMargin: false,
-        mode: "ace/mode/python",
-        fontSize: "14pt",
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true
-    });
-
-    let disabledEditorOptions = {
-        maxLines: 50,
-        minLines: 10,
-        autoScrollEditorIntoView: true,
-        theme: "ace/theme/monokai",
-        showPrintMargin: false,
-        mode: "ace/mode/python",
-        fontSize: "14pt",
-        readOnly: true
-    };
+    let editor = getCodeEditor("student_code_" + id)
 
     // helper to disable and enable buttons
     function switchButtons(disabled){
@@ -80,8 +57,7 @@ function PythonJudgeXBlock(runtime, element, context) {
     });
 
     // view answer button
-    let view_model_answer_editor = ace.edit("view_model_answer_" + id);
-    view_model_answer_editor.setOptions(disabledEditorOptions);
+    let view_model_answer_editor = getCodeEditor("view_model_answer_" + id, true)
     $(element).find('#model_answer_button_' + id)
         .leanModal()
         .on('click', function () {
@@ -97,8 +73,7 @@ function PythonJudgeXBlock(runtime, element, context) {
     if(context.is_course_staff) {
         $("#model_answer_container_" + id).show();
 
-        let view_submission_editor = ace.edit("view_student_code_" + id);
-        view_submission_editor.setOptions(disabledEditorOptions);
+        let view_submission_editor = getCodeEditor("view_student_code_" + id, true)
 
         $(element).find('.view_code_button_' + id)
             .leanModal()

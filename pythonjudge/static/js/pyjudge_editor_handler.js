@@ -32,3 +32,31 @@ function handleEditorResponse(response, feedbackElement, cb) {
     if (cb)
         cb(response.result);
 }
+
+function getCodeEditor(element, readOnly=false){
+    let editor = ace.edit(element);
+    editor.setOptions({
+        maxLines: 50,
+        minLines: 10,
+        autoScrollEditorIntoView: true,
+        theme: "ace/theme/monokai",
+        showPrintMargin: false,
+        mode: "ace/mode/python",
+        fontSize: "14pt",
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    });
+    if (!readOnly) {
+        ace.require("ace/ext/language_tools");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+    } else
+        editor.setOptions({
+            readOnly: true
+        });
+    return editor;
+}

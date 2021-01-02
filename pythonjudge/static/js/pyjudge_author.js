@@ -1,23 +1,10 @@
 function PythonJudgeXBlock(runtime, element, context) {
     let id = context.xblock_id;
 
-    let options = {
-        maxLines: 50,
-        minLines: 10,
-        autoScrollEditorIntoView: true,
-        theme: "ace/theme/monokai",
-        showPrintMargin: false,
-        mode: "ace/mode/python",
-        fontSize: "14pt"
-    };
-    let editor_initial = ace.edit("initial_code_" + id);
-    editor_initial.setOptions(options);
-    let editor_model_answer = ace.edit("model_answer_" + id);
-    editor_model_answer.setOptions(options);
-    if (context.uses_grader) {
-        let editor_grader = ace.edit("grader_code_" + id);
-        editor_grader.setOptions(options);
-    }
+    let editor_initial = getCodeEditor("initial_code_" + id);
+    let editor_model_answer = getCodeEditor("model_answer_" + id);
+    if (context.uses_grader)
+        let editor_grader = getCodeEditor("grader_code_" + id);
 
     // save settings
     function save_settings() {
