@@ -84,7 +84,34 @@ function PythonJudgeXBlock(runtime, element, context) {
                 handleEditorResponse(row.data('evaluation'), $("#view_code_feedback_" + id));
             });
 
-        $("#submissions_" + id).tablesorter();
+        $.tablesorter.addParser({
+            id: "data_pt",
+            is: function (_s) {
+                return false;
+            },
+            format: function (s, _table, _cell, _cellIndex) {
+                const mesHash = {
+                    'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4, 'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8, 'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
+                };
+                let mes = s.match(/(de)\s+(\w*)\s+(de)/)[2];
+                s = s.replace(mes, mesHash[mes])
+                    // replace separators
+                    .replace(/\s+(de)\s+/g, "/").replace(/\s+(às)\s+/g, " ")
+                    // reformat dd/mm/yy to mm/dd/yy
+                    .replace(/(\d{1,2})[\/\s](\d{1,2})[\/\s](\d{2})/, "$2/$1/$3");
+                return (new Date(s)).getTime();
+            },
+            type: "numeric"
+        });
+
+        $("#submissions_" + id).tablesorter({
+            theme: 'blue',
+            headers: {
+                2: {
+                    sorter: "data_pt"
+                }
+            }
+        });
     }
 
 
