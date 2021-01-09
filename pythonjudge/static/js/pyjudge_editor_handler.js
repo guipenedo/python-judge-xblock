@@ -4,6 +4,8 @@ function replaceNewLines(str) {
 
 // helper to visually format difference between outputs
 function formatOutputDiff(expected_out, output) {
+    if (output == null)
+        return "null";
     let i = 0, j = 0;
     while (j < output.length) {
         while (i < expected_out.length && expected_out[i] === '\n')
