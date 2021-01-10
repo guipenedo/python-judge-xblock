@@ -11,7 +11,7 @@
                 <div class="wrapper-comp-setting"><label class="label setting-label" for="grader_code_{{xblock_id}}">Grader code</label>
                     <div id="grader_code_{{xblock_id}}">{{grader_code}}</div>
                 </div>
-                <span class="tip setting-help">O grader para este problema (grader.py). Deverá chamar uma função do código do aluno (que está no ficheiro main.py) e imprimir para o stdout o resultado [0, 1]. Ignorado se este problema estiver configurado para grading input/output.</span>
+                <span class="tip setting-help">O grader para este problema (grader.py). Deverá chamar uma função do código do aluno (que está no ficheiro main.py) e imprimir para o stdout o que deverá ser comparado com a output do caso de teste (pode ser algo dinâmico). Para problemas em que os alunos utilizem stdin/out, façam a chamada para a função deles com o gutils.NoStd</span>
             </li>
         {% endif %}
         <li class="field comp-setting-entry is-set">

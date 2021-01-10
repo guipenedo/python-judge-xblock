@@ -55,14 +55,46 @@ def add_styling_and_editor(frag):
     frag.add_javascript(resource_string("static/js/pyjudge_editor_handler.js"))
 
 
+grader_utils = b"""
+import os
+import sys
+
+
+class NoStd(object):
+    def __enter__(self):
+        self.stdout = sys.stdout
+        self.stdin = sys.stdin
+        sys.stdout = open(os.devnull, 'w')
+        sys.stdin = open(os.devnull, 'r')
+        return self
+
+    def __exit__(self, type, value, traceback):
+        sys.stdout = self.stdout
+        sys.stdin = self.stdin
+
+"""
+
+grader_code_def = str(b"""import main
+from gutils import NoStd
+
+lista = [int(x) for x in input().split()]
+# todo o codigo que esteja dentro do NoStd nao tem acesso a stdout nem a stdin (nao meter o print aqui)
+with NoStd():
+    # exemplo: uma funcao que conta o numero de inteiros pares numa lista
+    result = main.conta_pares(lista)
+# fazemos print do resultado para ser comparado automaticamente com o resultado esperado deste caso de teste (pode ser dinamico)
+print(result)
+""", 'utf-8')
+
+
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, StudioEditableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
                           scope=Scope.settings,
                           help="O código inicial para este problema")
 
-    grader_code = String(display_name="initial_code",
-                         default="import main\n\nlista = [int(x) for x in input().split()]\n# os graders recebem a output esperada (se esta existir) a seguir à input\nresult = int(input())\n\n# exemplo: uma função que conta o número de inteiros pares numa lista\nif result == main.conta_pares(lista):\n    print(1.0)\nelse:\n    print(0.0)",
+    grader_code = String(display_name="grader_code",
+                         default=grader_code_def,
                          scope=Scope.settings,
                          help="O código do grader")
 
@@ -88,13 +120,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     grade_mode = String(display_name="grade_mode",
                         default='input/output',
                         scope=Scope.content,
-                        help="Modo de avaliação. Input/output é o caso simples de correr o programa para input e verificar se a output obtida é a indicada. Grader implica implementar código de python que execute o código dos alunos e imprima a nota [0, 1].",
+                        help="Modo de avaliação. Input/output é o caso simples de correr o programa para input e verificar se a output obtida é a indicada. Grader implica implementar código de python que execute o código dos alunos e imprima o seu resultado para ser comparado com a output do caso de teste.",
                         values=('input/output', 'python grader'))
 
     partial_grading = Boolean(display_name="partial_grading",
                               default=False,
                               scope=Scope.content,
-                              help="(Sem efeito para grading input/output). Se verdadeiro, usa como score a média dos scores para cada caso de teste. Se Falso, usa 0 se um caso for != 1 e 1 caso contrário.", )
+                              help="Se devemos correr todos os casos de teste e atribuir uma pontuação igual à percentagem de casos de teste que o programa passou.", )
 
     test_cases = String(display_name="test_cases",
                         default='[["Manuel", "Como te chamas?\\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\\nOlá, Menino Joãozinho"]]',
@@ -211,9 +243,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :return:
         """
         self.student_code = data["student_code"]
-        self.student_score = 0
-        # rescore even if the score lowers
-        self.rescore(False)
+
+        self.evaluate_submission()
+        self._publish_grade(self.get_score(), False)
+
         # store using submissions_api
         submissions_api.create_submission(self.get_student_item_dict(), {
             'code': self.student_code,
@@ -279,7 +312,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         input = data["input"]
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
 
-        result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
+        if self.grade_mode == 'input/output':
+            result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
+        else:
+            files.append({'name': 'grader.py', 'content': bytes(self.grader_code, 'utf-8')})
+            files.append({'name': 'gutils.py', 'content': grader_utils})
+            result = epicbox.run('python', 'python3 grader.py', files=files, limits=limits, stdin=input)
+
         stdout = clean_stdout(result["stdout"])
         stderr = clean_stdout(result["stderr"])
         return {
@@ -298,17 +337,18 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.student_score = 0
         simple_grading = self.grade_mode == 'input/output'
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
-        if not simple_grading:
-            files.append({'name': 'grader.py', 'content': bytes(self.grader_code, 'utf-8')})
+
         ti = 1
-        grade_sum = 0
+        tests_passed = 0
+
         for i_o in json.loads(self.test_cases):
             expected_output = clean_stdout(i_o[1])
             if simple_grading:
                 result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=i_o[0])
             else:
-                result = epicbox.run('python', 'python3 grader.py', files=files, limits=limits,
-                                     stdin=i_o[0] + "\n" + i_o[1])
+                files.append({'name': 'grader.py', 'content': bytes(self.grader_code, 'utf-8')})
+                files.append({'name': 'gutils.py', 'content': grader_utils})
+                result = epicbox.run('python', 'python3 grader.py', files=files, limits=limits, stdin=i_o[0])
             stdout = clean_stdout(result["stdout"])
             stderr = clean_stdout(result["stderr"])
             response = {
@@ -317,33 +357,27 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'test_case': ti,
                 'input': i_o[0],
                 'expected_output': expected_output,
-                'student_output': stdout if simple_grading else None,
+                'student_output': stdout,
                 'stderr': stderr
             }
-            partial_grade = 0.0
-            if not simple_grading:
-                try:
-                    partial_grade = float(stdout.replace("\n", ""))
-                except ValueError:
-                    pass
-            grade_sum += partial_grade
             if result["exit_code"] != 0 \
-                    or (simple_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")) \
-                    or (not simple_grading and not self.partial_grading and partial_grade != 1.0):
+                    or (not self.partial_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")):
                 self.save_output(response)
                 # completion interface
                 if not test:
                     self.emit_completion(0.0)
                 return
+            if self.partial_grading and stdout.replace("\n", "") == expected_output.replace("\n", ""):
+                tests_passed += 1
             ti += 1
-        if simple_grading:
+        if not self.partial_grading:
             self.student_score = 1.0
         else:
-            self.student_score = grade_sum / (ti - 1)
+            self.student_score = tests_passed / (ti - 1)
         # completion interface
         if not test:
             self.emit_completion(self.student_score)
-        if simple_grading or not self.partial_grading:
+        if not self.partial_grading:
             self.save_output({
                 'result': 'success',
                 'message': 'O teu programa passou em todos os ' + str(ti - 1) + ' casos de teste!'
@@ -351,7 +385,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         else:
             self.save_output({
                 'result': 'success',
-                'message': 'O teu programa obteve ' + str(int(self.student_score * 100)) + "%."
+                'message': 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos testes."
             })
 
     def save_output(self, output):
@@ -438,5 +472,21 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.student_score = score.raw_earned / score.raw_possible
 
     def calculate_score(self):
+        # we get the previous submission
+        subs = submissions_api.get_submissions(self.get_student_item_dict(), 1)
+        if len(subs) == 0:
+            return self.get_score()
+        submission = subs[0]
+        # evaluate with the previous code, and store the current one
+        current_code = self.student_code
+        self.student_code = submission['answer']['code']
         self.evaluate_submission()
+        # update the submission (recreate with the same date and code)
+        submissions_api.create_submission(self.get_student_item_dict(), {
+            'code': self.student_code,
+            'evaluation': self.last_output,
+            'score': int(self.student_score * 100)
+        }, attempt_number=1, submitted_at=submission['submitted_at'])
+        # restore the current code
+        self.student_code = current_code
         return self.get_score()
