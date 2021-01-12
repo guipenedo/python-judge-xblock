@@ -8,7 +8,7 @@ function PythonJudgeXBlock(runtime, element, context) {
         editor_grader = getCodeEditor("grader_code_" + id);
 
     // save settings
-    function save_settings() {
+    function save_settings(cb) {
         let data = {
             'initial_code': editor_initial.getValue(),
             'model_answer': editor_model_answer.getValue()
@@ -21,6 +21,8 @@ function PythonJudgeXBlock(runtime, element, context) {
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             if (response.result === 'success') {
                 runtime.notify('save', {state: 'end'});
+                if(cb)
+                  cb();
             } else {
                 runtime.notify('error', {title: gettext("Unable to update settings"), message: response.message});
             }
@@ -31,15 +33,16 @@ function PythonJudgeXBlock(runtime, element, context) {
     // submit
     $(element).find('#test_model_answer_' + id).bind('click', function () {
         // save current editors as well
-        save_settings();
         $(this).prop("disabled", true);
-        const data = {
-            'model_answer': editor_model_answer.getValue()
-        };
-        const handlerUrl = runtime.handlerUrl(element, 'test_model_solution');
-        $.post(handlerUrl, JSON.stringify(data)).done((response) => {
-            $(this).prop("disabled", false);
-            handleEditorResponse(response, $("#code-feedback" + "_" + id));
+        save_settings(() => {
+            const data = {
+              'model_answer': editor_model_answer.getValue()
+            };
+            const handlerUrl = runtime.handlerUrl(element, 'test_model_solution');
+            $.post(handlerUrl, JSON.stringify(data)).done((response) => {
+                $(this).prop("disabled", false);
+                handleEditorResponse(response, $("#code-feedback" + "_" + id));
+            });
         });
     });
 }
