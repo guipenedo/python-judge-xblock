@@ -51,6 +51,9 @@
         <th class="header">Nome <i class="icon fa fa-sort"/></th>
         <th class="header">Timestamp <i class="icon fa fa-sort"/></th>
         <th class="header">Score <i class="icon fa fa-sort"/></th>
+        {% if is_course_cohorted %}
+            <th class="header">Turma <i class="icon fa fa-sort"/></th>
+        {% endif %}
         <th class="header" data-sorter="false">Código</th>
     </tr>
     </thead>
@@ -61,6 +64,9 @@
         <td>{{assignment.fullname}}</td>
         <td>{{assignment.timestamp}}</td>
         <td>{{assignment.score}}/100</td>
+        {% if is_course_cohorted %}
+            <td>{{assignment.cohort}}</td>
+        {% endif %}
         <td>
             <a class="button view_code_button_{{ xblock_id }}" href="#view_code_{{ xblock_id }}">
                 Ver Submissão

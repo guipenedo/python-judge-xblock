@@ -12,6 +12,7 @@ import epicbox
 from xblockutils.resources import ResourceLoader
 from submissions import api as submissions_api
 from common.djangoapps.student.models import user_by_anonymous_id
+from openedx.core.djangoapps.course_groups.cohorts import get_cohort, is_course_cohorted
 
 loader = ResourceLoader(__name__)
 
@@ -164,6 +165,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 pass
         if self.show_staff_grading_interface():
             data['is_course_staff'] = True
+            data['is_course_cohorted'] = is_course_cohorted(self.course_id)
             data['submissions'] = self.get_sorted_submissions()
 
         html = loader.render_django_template('templates/pyjudge_student.html', data)
@@ -408,7 +410,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
         for submission in submissions:
             student = user_by_anonymous_id(submission['student_id'])
-            assignments.append({
+            sub = {
                 'submission_id': submission['uuid'],
                 'username': student.username,
                 'fullname': student.profile.name,
@@ -416,7 +418,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
                 'score': submission['answer']['score'] if 'score' in submission['answer'] else 0
-            })
+            }
+            if is_course_cohorted(self.course_id):
+                group = get_cohort(student, self.course_id, assign=False, use_cached=True)
+                sub['cohort'] = group.name if group else '(não atribuído)'
+            assignments.append(sub)
 
         assignments.sort(
             key=lambda assignment: assignment['timestamp'], reverse=True
