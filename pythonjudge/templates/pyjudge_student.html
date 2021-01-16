@@ -43,18 +43,28 @@
 <div class="code-feedback" id="code-feedback_{{xblock_id}}">Nenhuma submissão avaliada.</div>
 
 {% if is_course_staff %}
-<h3>Submissões</h3>
+<div class="submissions-header">
+    <h3>Submissões</h3>
+    {% if is_course_cohorted %}
+        <select id="turmas_filter_{{xblock_id}}" data-column="4">
+            <option value="">– Turma –</option>
+            {% for turma in cohorts %}
+                <option value="{{turma}}">{{turma}}</option>
+            {% endfor %}
+        </select>
+    {% endif %}
+</div>
 <table class="gridtable tablesorter" id="submissions_{{xblock_id}}">
     <thead>
     <tr>
-        <th class="header">Username <i class="icon fa fa-sort"/></th>
-        <th class="header">Nome <i class="icon fa fa-sort"/></th>
-        <th class="header">Timestamp <i class="icon fa fa-sort"/></th>
-        <th class="header">Score <i class="icon fa fa-sort"/></th>
+        <th>Username</th>
+        <th>Nome</th>
+        <th>Timestamp</th>
+        <th>Score</th>
         {% if is_course_cohorted %}
-            <th class="header">Turma <i class="icon fa fa-sort"/></th>
+            <th class="filter-exact" data-value="{{cohort}}">Turma</th>
         {% endif %}
-        <th class="header" data-sorter="false">Código</th>
+        <th data-sorter="false">Código</th>
     </tr>
     </thead>
     <tbody>

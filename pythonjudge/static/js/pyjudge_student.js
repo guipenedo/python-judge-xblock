@@ -93,7 +93,10 @@ function PythonJudgeXBlock(runtime, element, context) {
                 const mesHash = {
                     'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4, 'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8, 'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
                 };
-                let mes = s.match(/(de)\s+(\w*)\s+(de)/)[2];
+                let matches = s.match(/(de)\s+(\w*)\s+(de)/);
+                if (!matches)
+                    return 0;
+                let mes = matches[2];
                 s = s.replace(mes, mesHash[mes])
                     // replace separators
                     .replace(/\s+(de)\s+/g, "/").replace(/\s+(às)\s+/g, " ")
@@ -104,14 +107,32 @@ function PythonJudgeXBlock(runtime, element, context) {
             type: "numeric"
         });
 
-        $("#submissions_" + id).tablesorter({
+        let table_options = {
             theme: 'blue',
             headers: {
                 2: {
-                    sorter: "data_pt"
+                  sorter: "data_pt"
                 }
             }
-        });
+        };
+        if (context.is_course_cohorted) {
+            let turmas_filter = $('#turmas_filter_' + id);
+            table_options = {
+                widgets: ['zebra', 'filter'],
+                widgetOptions: {
+                    filter_columnFilters: false,
+                    filter_external: turmas_filter
+                },
+                ...table_options
+            }
+            turmas_filter.on('change', function () {
+                const change_cohort_handlerurl = runtime.handlerUrl(element, 'change_cohort');
+                $.post(change_cohort_handlerurl, JSON.stringify({
+                    'cohort': this.value
+                }));
+            });
+        }
+        $("#submissions_" + id).tablesorter(table_options);
     }
 
 

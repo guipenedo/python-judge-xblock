@@ -12,7 +12,7 @@ import epicbox
 from xblockutils.resources import ResourceLoader
 from submissions import api as submissions_api
 from common.djangoapps.student.models import user_by_anonymous_id
-from openedx.core.djangoapps.course_groups.cohorts import get_cohort, is_course_cohorted
+from openedx.core.djangoapps.course_groups.cohorts import get_cohort, is_course_cohorted, get_course_cohorts
 
 loader = ResourceLoader(__name__)
 
@@ -118,6 +118,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                           scope=Scope.settings,
                           help="Nome do componente na plataforma")
 
+    cohort = String(display_name="cohort",
+                          default="",
+                          scope=Scope.preferences,
+                          help="Turma selecionada para todos os editores")
+
     grade_mode = String(display_name="grade_mode",
                         default='input/output',
                         scope=Scope.content,
@@ -166,13 +171,16 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         if self.show_staff_grading_interface():
             data['is_course_staff'] = True
             data['is_course_cohorted'] = is_course_cohorted(self.course_id)
+            data['cohorts'] = [group.name for group in get_course_cohorts(course_id=self.course_id)]
+            data['cohort'] = self.cohort
             data['submissions'] = self.get_sorted_submissions()
 
         html = loader.render_django_template('templates/pyjudge_student.html', data)
         frag = Fragment(html)
 
         if self.show_staff_grading_interface():
-            frag.add_javascript(resource_string("static/js/jquery.tablesorter.min.js"))
+            frag.add_css(resource_string("static/css/theme.blue.min.css"))
+            frag.add_javascript(resource_string("static/js/jquery.tablesorter.combined.min.js"))
 
         frag.add_javascript(resource_string("static/js/pyjudge_student.js"))
         frag.initialize_js('PythonJudgeXBlock', data)
@@ -211,11 +219,19 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        self.initial_code = data["initial_code"]
-        if "model_answer" in data and data["model_answer"]:
-            self.model_answer = data["model_answer"]
-        if "grader_code" in data:
-            self.grader_code = data["grader_code"]
+        if getattr(self.xmodule_runtime, 'user_is_staff', False):
+            self.initial_code = data["initial_code"]
+            if "model_answer" in data and data["model_answer"]:
+                self.model_answer = data["model_answer"]
+            if "grader_code" in data:
+                self.grader_code = data["grader_code"]
+        return {
+            'result': 'success'
+        }
+
+    @XBlock.json_handler
+    def change_cohort(self, data, _suffix):
+        self.cohort = data["cohort"]
         return {
             'result': 'success'
         }
@@ -260,27 +276,31 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
     @XBlock.json_handler
     def test_model_solution(self, data, _suffix):
-        # cache current values
-        student_code = self.student_code
-        student_score = self.student_score
-        last_output = self.last_output
+        if getattr(self.xmodule_runtime, 'user_is_staff', False):
+            # cache current values
+            student_code = self.student_code
+            student_score = self.student_score
+            last_output = self.last_output
 
-        if "model_answer" not in data or not data["model_answer"]:
-            return {
-                'result': 'error',
-                'message': 'Empty model_answer.'
-            }
+            if "model_answer" not in data or not data["model_answer"]:
+                return {
+                    'result': 'error',
+                    'message': 'Empty model_answer.'
+                }
 
-        self.student_code = data["model_answer"]
-        self.evaluate_submission(True)
-        response = self.last_output
+            self.student_code = data["model_answer"]
+            self.evaluate_submission(True)
+            response = self.last_output
 
-        # revert
-        self.last_output = last_output
-        self.student_code = student_code
-        self.student_score = student_score
+            # revert
+            self.last_output = last_output
+            self.student_code = student_code
+            self.student_score = student_score
 
-        return json.loads(response)
+            return json.loads(response)
+        return {
+            'result': 'error'
+        }
 
     @XBlock.json_handler
     def get_model_answer(self, _data, _suffix):
