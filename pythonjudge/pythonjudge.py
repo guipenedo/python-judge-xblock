@@ -11,6 +11,7 @@ import json
 import epicbox
 from xblockutils.resources import ResourceLoader
 from submissions import api as submissions_api
+from webob import Response
 from common.djangoapps.student.models import user_by_anonymous_id
 from openedx.core.djangoapps.course_groups.cohorts import get_cohort, is_course_cohorted, get_course_cohorts
 
@@ -219,12 +220,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        if getattr(self.xmodule_runtime, 'user_is_staff', False):
-            self.initial_code = data["initial_code"]
-            if "model_answer" in data and data["model_answer"]:
-                self.model_answer = data["model_answer"]
-            if "grader_code" in data:
-                self.grader_code = data["grader_code"]
+        if not self.runtime.user_is_staff:
+            return Response('not allowed', status_code=403)
+        self.initial_code = data["initial_code"]
+        if "model_answer" in data and data["model_answer"]:
+            self.model_answer = data["model_answer"]
+        if "grader_code" in data:
+            self.grader_code = data["grader_code"]
         return {
             'result': 'success'
         }
@@ -276,31 +278,29 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
     @XBlock.json_handler
     def test_model_solution(self, data, _suffix):
-        if getattr(self.xmodule_runtime, 'user_is_staff', False):
-            # cache current values
-            student_code = self.student_code
-            student_score = self.student_score
-            last_output = self.last_output
+        if not self.runtime.user_is_staff:
+            return Response('not allowed', status_code=403)
+        # cache current values
+        student_code = self.student_code
+        student_score = self.student_score
+        last_output = self.last_output
 
-            if "model_answer" not in data or not data["model_answer"]:
-                return {
-                    'result': 'error',
-                    'message': 'Empty model_answer.'
-                }
+        if "model_answer" not in data or not data["model_answer"]:
+            return {
+                'result': 'error',
+                'message': 'Empty model_answer.'
+            }
 
-            self.student_code = data["model_answer"]
-            self.evaluate_submission(True)
-            response = self.last_output
+        self.student_code = data["model_answer"]
+        self.evaluate_submission(True)
+        response = self.last_output
 
-            # revert
-            self.last_output = last_output
-            self.student_code = student_code
-            self.student_score = student_score
+        # revert
+        self.last_output = last_output
+        self.student_code = student_code
+        self.student_score = student_score
 
-            return json.loads(response)
-        return {
-            'result': 'error'
-        }
+        return json.loads(response)
 
     @XBlock.json_handler
     def get_model_answer(self, _data, _suffix):
