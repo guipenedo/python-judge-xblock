@@ -220,8 +220,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        if not self.runtime.is_author_mode:
-            return Response('not allowed', status_code=403)
         self.initial_code = data["initial_code"]
         if "model_answer" in data and data["model_answer"]:
             self.model_answer = data["model_answer"]
@@ -278,8 +276,6 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
     @XBlock.json_handler
     def test_model_solution(self, data, _suffix):
-        if not self.runtime.is_author_mode:
-            return Response('not allowed', status_code=403)
         # cache current values
         student_code = self.student_code
         student_score = self.student_score
