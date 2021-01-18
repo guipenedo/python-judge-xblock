@@ -3,7 +3,7 @@ import six
 from xblock.completable import CompletableXBlockMixin
 from xblock.scorable import ScorableXBlockMixin, Score
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Float, Boolean
+from xblock.fields import Scope, String, Float, Boolean, Integer
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from web_fragments.fragment import Fragment
@@ -120,9 +120,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                           help="Nome do componente na plataforma")
 
     cohort = String(display_name="cohort",
-                          default="",
-                          scope=Scope.preferences,
-                          help="Turma selecionada para todos os editores")
+                    default="",
+                    scope=Scope.preferences,
+                    help="Turma selecionada para todos os editores")
 
     grade_mode = String(display_name="grade_mode",
                         default='input/output',
@@ -144,6 +144,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     last_output = String(display_name="last_output",
                          default="",
                          scope=Scope.user_state)
+
+    nrsubmissions = Integer(display_name="nrsubmissions",
+                            default=0,
+                            scope=Scope.user_state)
 
     editable_fields = ('display_name', 'grade_mode', 'partial_grading', 'test_cases')
     icon_class = 'problem'
@@ -263,6 +267,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self.student_code = data["student_code"]
 
         self.evaluate_submission()
+        self.nrsubmissions += 1
         self._publish_grade(self.get_score(), False)
 
         # store using submissions_api
@@ -379,7 +384,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'stderr': stderr
             }
             if result["exit_code"] != 0 \
-                    or (not self.partial_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")):
+                or (not self.partial_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")):
                 self.save_output(response)
                 # completion interface
                 if not test:
