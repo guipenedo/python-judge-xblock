@@ -487,6 +487,9 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     def has_submitted_answer(self):
         return self.student_score != -1
 
+    def max_score(self):
+        return 1
+
     def get_score(self):
         return Score(raw_earned=max(self.student_score, 0.0), raw_possible=1.0)
 
