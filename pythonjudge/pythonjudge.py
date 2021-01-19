@@ -124,6 +124,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                     scope=Scope.preferences,
                     help="Turma selecionada para todos os editores")
 
+    no_submission = Boolean(display_name="no_submission",
+                            default=False,
+                            scope=Scope.content,
+                            help="Se True, então este bloco não terá submissão (serve apenas para correr \"ludicamente\" código.")
+
     grade_mode = String(display_name="grade_mode",
                         default='input/output',
                         scope=Scope.content,
@@ -133,7 +138,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
     partial_grading = Boolean(display_name="partial_grading",
                               default=False,
                               scope=Scope.content,
-                              help="Se devemos correr todos os casos de teste e atribuir uma pontuação igual à percentagem de casos de teste que o programa passou.", )
+                              help="Se devemos correr todos os casos de teste e atribuir uma pontuação igual à percentagem de casos de teste que o programa passou.")
 
     test_cases = String(display_name="test_cases",
                         default='[["Manuel", "Como te chamas?\\nOlá, Manuel"], ["X ae A-Xii", "Como te chamas?\\nOlá, X ae A-Xii"], ["Menino Joãozinho", "Como te chamas?\\nOlá, Menino Joãozinho"]]',
@@ -149,7 +154,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                             default=0,
                             scope=Scope.user_state)
 
-    editable_fields = ('display_name', 'grade_mode', 'partial_grading', 'test_cases')
+    editable_fields = ('display_name', 'no_submission', 'grade_mode', 'partial_grading', 'test_cases')
     icon_class = 'problem'
     block_type = 'problem'
     has_author_view = True
@@ -166,7 +171,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             self.student_code = self.initial_code
         data = {
             'student_code': self.student_code,
-            'xblock_id': self._get_xblock_loc()
+            'xblock_id': self._get_xblock_loc(),
+            'no_submission': self.no_submission
         }
         if self.last_output:
             try:
@@ -199,13 +205,15 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             'model_answer': self.model_answer,
             'grader_code': self.grader_code,
             'uses_grader': self.grade_mode != 'input/output',
-            'xblock_id': self._get_xblock_loc()
+            'xblock_id': self._get_xblock_loc(),
+            'no_submission': self.no_submission
         })
         frag = Fragment(html)
         add_styling_and_editor(frag)
         frag.add_javascript(resource_string("static/js/pyjudge_author.js"))
         frag.initialize_js('PythonJudgeXBlock', {'xblock_id': self._get_xblock_loc(),
-                                                 'uses_grader': self.grade_mode != 'input/output'})
+                                                 'uses_grader': self.grade_mode != 'input/output',
+                                                 'no_submission': self.no_submission})
         return frag
 
     def validate_field_data(self, validation, data):
@@ -357,6 +365,11 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             Evaluate this student's latest submission with our test cases
         :return:
         """
+        if self.no_submission:
+            return {
+                'result': 'error',
+                'message': 'Este problema não tem avaliação!'
+            }
         self.student_score = 0
         simple_grading = self.grade_mode == 'input/output'
         files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
@@ -486,22 +499,30 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         Return if current user is staff and not in studio.
         """
         in_studio_preview = self.scope_ids.user_id is None
-        return getattr(self.xmodule_runtime, 'user_is_staff', False) and not in_studio_preview
+        return getattr(self.xmodule_runtime, 'user_is_staff', False) and not in_studio_preview and not self.no_submission
 
     #  ----------- ScorableXBlockMixin -----------
     def has_submitted_answer(self):
         return self.student_score != -1
 
     def max_score(self):
+        if self.no_submission:
+            return None
         return 1
 
     def get_score(self):
+        if self.no_submission:
+            return None
         return Score(raw_earned=max(self.student_score, 0.0), raw_possible=1.0)
 
     def set_score(self, score):
+        if self.no_submission:
+            return
         self.student_score = score.raw_earned / score.raw_possible
 
     def calculate_score(self):
+        if self.no_submission:
+            return None
         # we get the previous submission
         subs = submissions_api.get_submissions(self.get_student_item_dict(), 1)
         if len(subs) == 0:

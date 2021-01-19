@@ -17,6 +17,7 @@
         <pre class="code-runner-output" id="code-runner-output_{{xblock_id}}"></pre>
     </div>
 </div>
+{% if not no_submission %}
 <div class="action">
     <div class="action-buttons">
         <button class="submit btn-brand" data-should-enable-submit-button="True" data-submitting="Correndo"
@@ -41,6 +42,7 @@
     </div>
 </div>
 <div class="code-feedback" id="code-feedback_{{xblock_id}}">Nenhuma submissão avaliada.</div>
+{% endif %}
 
 {% if is_course_staff %}
 <div class="submissions-header">
