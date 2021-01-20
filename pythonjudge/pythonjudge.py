@@ -397,7 +397,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'stderr': stderr
             }
             if result["exit_code"] != 0 \
-                or (not self.partial_grading and stdout.replace("\n", "") != expected_output.replace("\n", "")):
+                or ((not self.partial_grading or ti == 1) and stdout.replace("\n", "") != expected_output.replace("\n", "")):
                 self.save_output(response)
                 # completion interface
                 if not test:
