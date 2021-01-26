@@ -403,7 +403,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 if not test:
                     self.emit_completion(0.0)
                 return
-            if self.partial_grading and stdout.replace("\n", "") == expected_output.replace("\n", ""):
+            if self.partial_grading and result["exit_code"] == 0 and stdout.replace("\n", "") == expected_output.replace("\n", ""):
                 tests_passed += 1
             ti += 1
         if not self.partial_grading:
