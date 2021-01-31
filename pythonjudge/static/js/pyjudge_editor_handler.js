@@ -32,7 +32,7 @@ function handleEditorResponse(response, feedbackElement, cb) {
             feedbackElement.html("<span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> <b><u>Erro no caso de teste " + response.test_case + "</u></b><br/><b>Input:</b> " + response.input + "<br/><b>Output esperada:</b> " + replaceNewLines(response.expected_output) + "<br/><b>=============</b><br/><b>Exit code:</b> " + response.exit_code + "<br/><b>Erro do teu programa:</b> " + replaceNewLines(response.stderr))
     }
     // noinspection EqualityComparisonWithCoercionJS
-    if (cb && response.result && score in response && response.score == 1.0)
+    if (cb && response.result && "score" in response && response.score == 1.0)
         cb();
 }
 
