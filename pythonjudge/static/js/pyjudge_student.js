@@ -23,8 +23,7 @@ function PythonJudgeXBlock(runtime, element, context) {
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             switchButtons(false);
             handleEditorResponse(response, $("#code-feedback_" + id), (result) => {
-                if (result === 'success')
-                    $("#model_answer_container_" + id).show();
+                $("#model_answer_container_" + id).show();
             })
         });
     });
@@ -150,7 +149,9 @@ function PythonJudgeXBlock(runtime, element, context) {
     }, 10*1000);
 
     if (context.last_output)
-        handleEditorResponse(context.last_output, $("#code-feedback_" + id));
+        handleEditorResponse(context.last_output, $("#code-feedback_" + id), (result) => {
+            $("#model_answer_container_" + id).show();
+        })
 
     if(context.no_submission && context.no_submission === true)
         $(element).find('#code-runner_' + id).show();

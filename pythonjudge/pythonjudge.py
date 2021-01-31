@@ -416,12 +416,14 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         if not self.partial_grading:
             self.save_output({
                 'result': 'success',
-                'message': 'O teu programa passou em todos os ' + str(ti - 1) + ' casos de teste!'
+                'message': 'O teu programa passou em todos os ' + str(ti - 1) + ' casos de teste!',
+                'score': self.student_score
             })
         else:
             self.save_output({
                 'result': 'success',
-                'message': 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos testes."
+                'message': 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos testes.",
+                'score': self.student_score
             })
 
     def save_output(self, output):
