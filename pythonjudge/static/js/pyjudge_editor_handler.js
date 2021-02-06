@@ -22,7 +22,25 @@ function formatOutputDiff(expected_out, output) {
     return formatted_output
 }
 
+function truncate(s){
+    if (s.length > 10000)
+        s = s.substring(0, 10000)
+    return s;
+}
+
+function truncateResponse(response){
+    if (response.stderr)
+        response.stderr = truncate(response.stderr);
+    if (response.expected_output)
+        response.expected_output = truncate(response.expected_output);
+    if (response.student_output)
+        response.student_output = truncate(response.student_output);
+    if (response.stdout)
+        response.stdout = truncate(response.stdout);
+}
+
 function handleEditorResponse(response, feedbackElement, cb) {
+    truncateResponse(response);
     if (response.result === 'success') {
         feedbackElement.html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
     } else {
