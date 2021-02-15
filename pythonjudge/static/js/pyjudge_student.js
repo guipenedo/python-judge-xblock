@@ -134,19 +134,18 @@ function PythonJudgeXBlock(runtime, element, context) {
         $("#submissions_" + id).tablesorter(table_options);
     }
 
-
-    //autosave every 10 seconds
-    let previous_code = editor.getValue();
-    const autosave_handlerurl = runtime.handlerUrl(element, 'autosave_code');
-    setInterval(() => {
-        if (previous_code !== editor.getValue()){
-            previous_code = editor.getValue();
+    // autosave 3 seconds after no activity
+    let autosaveTimeoutId;
+    const autosave_handlerurl = runtime.handlerUrl(element, "autosave_code");
+    editor.on("change", () => {
+        if (autosaveTimeoutId) clearTimeout(autosaveTimeoutId);
+        autosaveTimeoutId = setTimeout(() => {
             const data = {
-                'student_code': previous_code
+                student_code: editor.getValue(),
             };
             $.post(autosave_handlerurl, JSON.stringify(data));
-        }
-    }, 10*1000);
+        }, 3000);
+    });
 
     if (context.last_output)
         handleEditorResponse(context.last_output, $("#code-feedback_" + id), (result) => {
