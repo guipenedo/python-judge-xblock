@@ -151,6 +151,8 @@ function PythonJudgeXBlock(runtime, element, context) {
         handleEditorResponse(context.last_output, $("#code-feedback_" + id), (result) => {
             $("#model_answer_container_" + id).show();
         })
+    if (context.course_ended)
+        $("#model_answer_container_" + id).show();
 
     if(context.no_submission && context.no_submission === true)
         $(element).find('#code-runner_' + id).show();

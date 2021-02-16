@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pkg_resources
 import six
 from xblock.completable import CompletableXBlockMixin
@@ -11,9 +13,10 @@ import json
 import epicbox
 from xblockutils.resources import ResourceLoader
 from submissions import api as submissions_api
-from webob import Response
+from pytz import utc
 from common.djangoapps.student.models import user_by_anonymous_id
 from openedx.core.djangoapps.course_groups.cohorts import get_cohort, is_course_cohorted, get_course_cohorts
+from openedx.core.djangoapps.models.course_details import CourseDetails
 
 loader = ResourceLoader(__name__)
 
@@ -172,7 +175,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         data = {
             'student_code': self.student_code,
             'xblock_id': self._get_xblock_loc(),
-            'no_submission': self.no_submission
+            'no_submission': self.no_submission,
+            'course_ended': self.is_course_ended()
         }
         if self.last_output:
             try:
@@ -279,11 +283,12 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         self._publish_grade(self.get_score(), False)
 
         # store using submissions_api
-        submissions_api.create_submission(self.get_student_item_dict(), {
-            'code': self.student_code,
-            'evaluation': self.last_output,
-            'score': int(self.student_score * 100)
-        }, attempt_number=1)
+        if not self.is_course_ended():
+            submissions_api.create_submission(self.get_student_item_dict(), {
+                'code': self.student_code,
+                'evaluation': self.last_output,
+                'score': int(self.student_score * 100)
+            }, attempt_number=1)
         # send back the evaluation as json object
         return json.loads(self.last_output)
 
@@ -321,7 +326,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :return:
         """
 
-        if self.student_score < 1.0 and not self.show_staff_grading_interface():
+        if self.student_score < 1.0 and not (self.show_staff_grading_interface() or self.is_course_ended()):
             return {
                 'result': 'error',
                 'message': 'Ainda não completaste este problema!'
@@ -502,6 +507,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         """
         in_studio_preview = self.scope_ids.user_id is None
         return getattr(self.xmodule_runtime, 'user_is_staff', False) and not in_studio_preview and not self.no_submission
+
+    def is_course_ended(self):
+        course_end = CourseDetails.fetch(self.course_id).end_date
+        return course_end and course_end.timestamp() < datetime.now(utc).timestamp()
 
     #  ----------- ScorableXBlockMixin -----------
     def has_submitted_answer(self):
