@@ -39,6 +39,10 @@ def clean_stdout(std):
     return str(std).strip(" \n").replace('\r', '\n')
 
 
+def compare_outputs(out1, out2):
+    return out1.replace(" ", "").replace("\n", "") == out2.replace(" ", "").replace("\n", "")
+
+
 def resource_string(path):
     """Handy helper for getting resources from our kit."""
     data = pkg_resources.resource_string(__name__, path)
@@ -402,13 +406,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'stderr': stderr
             }
             if (result["exit_code"] != 0 and (not self.partial_grading or result["exit_code"] != 137))\
-                or ((not self.partial_grading or ti == 1) and stdout.replace("\n", "") != expected_output.replace("\n", "")):
+                or ((not self.partial_grading or ti == 1) and not compare_outputs(stdout, expected_output)):
                 self.save_output(response)
                 # completion interface
                 if not test:
                     self.emit_completion(0.0)
                 return
-            if self.partial_grading and result["exit_code"] == 0 and stdout.replace("\n", "") == expected_output.replace("\n", ""):
+            if self.partial_grading and result["exit_code"] == 0 and compare_outputs(stdout, expected_output):
                 tests_passed += 1
             ti += 1
         if not self.partial_grading:
