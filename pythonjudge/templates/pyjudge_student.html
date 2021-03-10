@@ -51,7 +51,7 @@
         <select id="turmas_filter_{{xblock_id}}" data-column="4">
             <option value="">– Turma –</option>
             {% for turma in cohorts %}
-                <option value="{{turma}}">{{turma}}</option>
+                <option value="{{turma}}=">{{turma}}</option>
             {% endfor %}
         </select>
     {% endif %}

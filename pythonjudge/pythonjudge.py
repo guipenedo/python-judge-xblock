@@ -96,6 +96,15 @@ print(result)
 """, 'utf-8')
 
 
+def format_name(name):
+    names = name.split()
+    if len(names) > 0:
+        name = names[0]
+    if len(names) > 1:
+        name += " " + names[-1]
+    return name
+
+
 class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, StudioEditableXBlockMixin):
     initial_code = String(display_name="initial_code",
                           default="N = input('Qual é o valor de N?')\nprint(N)",
@@ -458,7 +467,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
             sub = {
                 'submission_id': submission['uuid'],
                 'username': student.username,
-                'fullname': student.profile.name,
+                'fullname': format_name(student.profile.name),
                 'timestamp': submission['submitted_at'] or submission['created_at'],
                 'code': submission['answer']['code'],
                 'evaluation': submission['answer']['evaluation'],
