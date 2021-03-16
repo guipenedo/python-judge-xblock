@@ -88,6 +88,16 @@ function errorTip(stderr){
     return null;
 }
 
+function render_error(response){
+    let html = "<div class='error_window'><label for=\"submission_program_error\">Exit code: <b>" + response.exit_code + "</b></label>"
+        + "<pre class=\"code-runner-output\" id=\"submission_program_error\">" + replaceNewLines(formatStderr(response.stderr)) + "</pre>"
+    const error_tip = errorTip(response.stderr);
+    if (error_tip)
+        html += "<p class='error_tip'><b>Sugestão</b>: <i>" + error_tip + "</i></p>";
+    html += "</div>";
+    return html;
+}
+
 function handleEditorResponse(response, feedbackElement, cb) {
     truncateResponse(response);
     if (response.result === 'success') {
@@ -101,14 +111,9 @@ function handleEditorResponse(response, feedbackElement, cb) {
             html += "<h3 class='feedback_title'><span aria-hidden=\"true\" class=\"fa fa-warning\" style=\"color:darkred\"></span> Erro no <b>Teste " + response.test_case + "</b></h3>"
         html += "<label for=\"submission_input\">Input</label>"
             + "<pre class=\"code-runner-output\" id=\"submission_input\">" + replaceNewLines(response.input) + "</pre>";
-        if (!no_error) {
-            html += "<div class='error_window'><label for=\"submission_program_error\">Exit code: <b>" + response.exit_code + "</b></label>"
-                + "<pre class=\"code-runner-output\" id=\"submission_program_error\">" + replaceNewLines(formatStderr(response.stderr)) + "</pre>"
-            const error_tip = errorTip(response.stderr);
-            if (error_tip)
-                html += "<p class='error_tip'><b>Sugestão</b>: <i>" + error_tip + "</i></p>";
-            html += "</div>";
-        } else {
+        if (!no_error)
+            html += render_error(response);
+        else {
             let formatted = formatOutputDiff(response.expected_output, response.student_output);
             let formatted_output = formatted[0], formatted_expected = formatted[1];
             html += "<div class='action error_window'>"

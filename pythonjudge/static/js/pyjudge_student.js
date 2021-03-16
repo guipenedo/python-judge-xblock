@@ -44,10 +44,17 @@ function PythonJudgeXBlock(runtime, element, context) {
         const handlerUrl = runtime.handlerUrl(element, 'run_code');
         $.post(handlerUrl, JSON.stringify(data)).done(function (response) {
             switchButtons(false);
+            let code_runner_footer = $("#code-runner-footer_" + id)
+            let previous_error = code_runner_footer.find(".error_window");
+            if (previous_error)
+                previous_error.remove();
             if (response.exit_code === 0 && !response.stderr)
                 $("#code-runner-output_" + id).html(replaceNewLines(response.stdout));
-            else
-                $("#code-runner-output_" + id).html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + replaceNewLines(response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + replaceNewLines(response.stderr));
+            else {
+                //$("#code-runner-output_" + id).html("<u>Erro de execução.</u> Exit code: <b>" + response.exit_code + "</b><br /><b>Output:</b> " + replaceNewLines(response.stdout ? response.stdout : "?") + "<br /><b>Stderr:</b> " + replaceNewLines(response.stderr));
+                code_runner_footer.append(render_error(response));
+                $("#code-runner-output_" + id).text("ERRO DE EXECUÇÃO");
+            }
 
         }).fail(function () {
             switchButtons(false);

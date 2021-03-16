@@ -273,7 +273,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        if data["student_code"] != self.student_code:
+        if data["student_code"] != "" and self.student_score != 1.0:
             self.student_code = data["student_code"]
         return {
             'result': 'success'
@@ -289,9 +289,20 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
+        backup_code = self.student_code
+        prev_grade = self.student_score
+        last_output = self.last_output
         self.student_code = data["student_code"]
 
         self.evaluate_submission()
+        # if score did not improve or remains the same, revert update
+        if self.student_score == 0.0 and prev_grade == 1.0:
+            output_to_send = self.last_output
+            self.student_code = backup_code
+            self.student_score = prev_grade
+            self.last_output = last_output
+            self._publish_grade(self.get_score(), False)
+            return json.loads(output_to_send)
         self.nrsubmissions += 1
         self._publish_grade(self.get_score(), False)
 
@@ -357,9 +368,10 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         :param _suffix:
         :return:
         """
-        self.student_code = data["student_code"]
+        if self.student_score != 1.0:
+            self.student_code = data["student_code"]
         input = data["input"]
-        files = [{'name': 'main.py', 'content': bytes(self.student_code, 'utf-8')}]
+        files = [{'name': 'main.py', 'content': bytes(data["student_code"], 'utf-8')}]
 
         if self.grade_mode == 'input/output':
             result = epicbox.run('python', 'python3 main.py', files=files, limits=limits, stdin=input)
