@@ -406,6 +406,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
         ti = 1
         tests_passed = 0
+        partial_output = {}
 
         for i_o in json.loads(self.test_cases):
             expected_output = clean_stdout(i_o[1])
@@ -417,25 +418,34 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 result = epicbox.run('python', 'python3 grader.py', files=files, limits=limits, stdin=i_o[0])
             stdout = clean_stdout(result["stdout"])
             stderr = clean_stdout(result["stderr"])
-            response = {
-                'result': 'error',
-                'exit_code': result["exit_code"],
-                'test_case': ti,
-                'input': i_o[0],
-                'expected_output': expected_output,
-                'student_output': stdout,
-                'stderr': stderr
-            }
-            if (result["exit_code"] != 0 and (not self.partial_grading or result["exit_code"] != 137))\
-                or ((not self.partial_grading or ti == 1) and not compare_outputs(stdout, expected_output)):
-                self.save_output(response)
-                # completion interface
-                if not test:
-                    self.emit_completion(0.0)
-                return
-            if self.partial_grading and result["exit_code"] == 0 and compare_outputs(stdout, expected_output):
+
+            # correct submission: good output and 0 exit code
+            correct = result["exit_code"] == 0 and compare_outputs(stdout, expected_output)
+            if not correct:
+                incorrect_result = {
+                    'result': 'error',
+                    'exit_code': result["exit_code"],
+                    'test_case': ti,
+                    'input': i_o[0],
+                    'expected_output': expected_output,
+                    'student_output': stdout,
+                    'stderr': stderr
+                }
+                # we return when the result is not correct, if we are not on partial_grading OR if we are but there
+                # is an error other than TLE
+                if not self.partial_grading or (result["exit_code"] != 137 and result["exit_code"] != 0):
+                    self.save_output(test_result)
+                    # completion interface
+                    if not test:
+                        self.emit_completion(0.0)
+                # if the output is not correct, we are in partial grading and this is the first failed test, save output
+                elif self.partial_grading and 'result' not in partial_output:  # first failed
+                    partial_output = incorrect_result.copy()
+            # if correct and partial_grading, increment passed tests
+            elif self.partial_grading:
                 tests_passed += 1
             ti += 1
+        # end loop
         if not self.partial_grading:
             self.student_score = 1.0
         else:
@@ -450,10 +460,13 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 'score': self.student_score
             })
         else:
+            if tests_passed > 0:
+                partial_output["result"] = 'success'
+                partial_output["message"] = 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos " \
+                                                                                                               "testes. "
+                partial_output["score"] = self.student_score
             self.save_output({
-                'result': 'success',
-                'message': 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos testes.",
-                'score': self.student_score
+                partial_output
             })
 
     def save_output(self, output):
@@ -531,7 +544,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
         Return if current user is staff and not in studio.
         """
         in_studio_preview = self.scope_ids.user_id is None
-        return getattr(self.xmodule_runtime, 'user_is_staff', False) and not in_studio_preview and not self.no_submission
+        return getattr(self.xmodule_runtime, 'user_is_staff',
+                       False) and not in_studio_preview and not self.no_submission
 
     def is_course_ended(self):
         course_end = CourseDetails.fetch(self.course_id).end_date

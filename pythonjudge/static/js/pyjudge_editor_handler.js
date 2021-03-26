@@ -100,10 +100,11 @@ function render_error(response){
 
 function handleEditorResponse(response, feedbackElement, cb) {
     truncateResponse(response);
+    let html = "";
     if (response.result === 'success') {
-        feedbackElement.html("<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message);
-    } else {
-        let html = "";
+        html += "<i aria-hidden=\"true\" class=\"fa fa-check\" style=\"color:green\"></i> " + response.message;
+    }
+    if (response.result !== 'success' || 'test_case' in response){
         const no_error = response.exit_code === 0 && !response.stderr;
         if (no_error)
             html += "<h3 class='feedback_title'><span aria-hidden=\"true\" class=\"fa fa-times\" style=\"color:darkred\"></span> Output incorreta no <b>Teste " + response.test_case + "</b></h3>"
@@ -122,8 +123,8 @@ function handleEditorResponse(response, feedbackElement, cb) {
                 + "<div><label for=\"submission_expected_output\">Output esperado</label>"
                 + "<pre class=\"code-runner-output\" id=\"submission_expected_output\">" + replaceNewLines(formatted_expected) + "</pre></div></div>";
         }
-        feedbackElement.html(html)
     }
+    feedbackElement.html(html)
     // noinspection EqualityComparisonWithCoercionJS
     if (cb && response.result && "score" in response && response.score == 1.0)
         cb();
