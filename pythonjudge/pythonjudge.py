@@ -438,6 +438,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                     # completion interface
                     if not test:
                         self.emit_completion(0.0)
+                    return
                 # if the output is not correct, we are in partial grading and this is the first failed test, save output
                 elif self.partial_grading and 'result' not in partial_output:  # first failed
                     partial_output = incorrect_result.copy()
