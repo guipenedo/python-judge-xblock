@@ -434,7 +434,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 # we return when the result is not correct, if we are not on partial_grading OR if we are but there
                 # is an error other than TLE
                 if not self.partial_grading or (result["exit_code"] != 137 and result["exit_code"] != 0):
-                    self.save_output(test_result)
+                    self.save_output(incorrect_result)
                     # completion interface
                     if not test:
                         self.emit_completion(0.0)
@@ -465,9 +465,7 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
                 partial_output["message"] = 'O teu programa passou em ' + str(int(self.student_score * 100)) + "% dos " \
                                                                                                                "testes. "
                 partial_output["score"] = self.student_score
-            self.save_output({
-                partial_output
-            })
+            self.save_output(partial_output)
 
     def save_output(self, output):
         """
