@@ -488,6 +488,8 @@ class PythonJudgeXBlock(XBlock, ScorableXBlockMixin, CompletableXBlockMixin, Stu
 
         for submission in submissions:
             student = user_by_anonymous_id(submission['student_id'])
+            if not student:
+                continue
             sub = {
                 'submission_id': submission['uuid'],
                 'username': student.username,
